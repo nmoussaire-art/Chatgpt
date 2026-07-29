@@ -1,0 +1,22 @@
+# Build output
+.gradle/
+build/
+app/build/
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local SDK location
+local.properties
+
+# ---------------------------------------------------------------
+# SIGNING MATERIAL - NEVER COMMIT THESE
+# ---------------------------------------------------------------
+*.jks
+*.keystore
+*.p12
+keystore.properties
+signing/
+release-key-*.txt
