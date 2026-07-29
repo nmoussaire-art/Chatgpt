@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shield with a clock hand: "protection" + "time running out". -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 L78,33 L78,55 C78,68.5 67.5,79.5 54,85 C40.5,79.5 30,68.5 30,55 L30,33 Z" />
+
+    <path
+        android:fillColor="#11628F"
+        android:pathData="M51.2,38.5 L56.8,38.5 L56.8,56.2 L68,56.2 L68,51.4 L51.2,51.4 Z" />
+</vector>

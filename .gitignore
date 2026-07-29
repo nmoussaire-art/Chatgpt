@@ -1,0 +1,16 @@
+*.iml
+.gradle/
+.idea/
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Signing material and build outputs must never land in a public repo.
+keystore/
+*.jks
+*.keystore
+*.apk
+*.aab
