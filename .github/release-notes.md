@@ -37,7 +37,7 @@ break — all future versions update normally.
   fills in the contact, date, urgency, tag and category — and shows what it understood.
 - **Four follow-up tones** (Friendly, Professional, Firm, Final notice) written from the
   loop's real history, reference number and elapsed silence.
-- **Voice capture**, **share-to-capture** and **22 templates** for school, medical,
+- **Voice capture**, **share-to-capture** and **24 templates** for school, medical,
   property, finance, government and work situations.
 - **Restrained reminders**: one daily digest plus at most two critical nudges, with
   *Snooze* and *Mark done* on the notification itself.

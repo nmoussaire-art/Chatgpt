@@ -49,7 +49,7 @@ Jetpack Compose application on a real database. Everything 1.0 could do, 2.0 sti
 - **Voice capture** through the system recogniser, feeding the same parser.
 - **Share-to-capture.** Share text from your email or messaging app into LoopGuard and it
   becomes a parsed loop.
-- **22 templates** across school, medical, property, finance, government and work. Each one
+- **24 templates** across school, medical, property, finance, government and work. Each one
   carries a realistic deadline, the right responsibility side, and a prompt for the context
   you will wish you had written down.
 - **Smart, restrained reminders.** One daily digest at a time you choose, plus at most two

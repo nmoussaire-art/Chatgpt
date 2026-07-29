@@ -22,7 +22,7 @@ are new.
 - **Four follow-up tones** — Friendly, Professional, Firm, Final notice — built from the
   loop's real history, with an automatically suggested tone based on how many times you
   have already chased.
-- **22 templates** across school, medical, property, finance, government/admin and work.
+- **24 templates** across school, medical, property, finance, government/admin and work.
 - **Daily digest notifications** through WorkManager, at a time you choose, with
   *Snooze 1 day* and *Mark done* actions on the notification itself. Capped at three
   notifications a day.
