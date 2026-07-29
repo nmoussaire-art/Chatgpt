@@ -18,6 +18,21 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    /**
+     * ML Kit ships a ~11 MB native OCR library per architecture, and a universal APK
+     * carrying all four is too large to move around comfortably. Real phones are
+     * arm64-v8a (and older 32-bit ones armeabi-v7a); the x86 variants only serve
+     * emulators, so they are dropped.
+     */
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
+            isUniversalApk = false
+        }
+    }
+
     signingConfigs {
         create("release") {
             storeFile = file(providers.gradleProperty("dg.storeFile").getOrElse("../keystore/deadline-guardian.jks"))
