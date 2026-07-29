@@ -31,7 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,8 +56,10 @@ import com.loopguard.app.ui.theme.LoopGuardTheme
 
 class MainActivity : ComponentActivity() {
 
-    private var pendingSharedText: String? = null
-    private var pendingLoopId: Long? = null
+    // Compose state, not plain fields: an intent delivered to an already
+    // running activity via onNewIntent must trigger recomposition.
+    private var pendingSharedText by mutableStateOf<String?>(null)
+    private var pendingLoopId by mutableStateOf<Long?>(null)
 
     private val notificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -160,10 +164,16 @@ private fun LoopGuardNavigation(
         onPauseOrDispose { }
     }
 
+    // Latched separately from the activity's field: the activity clears its
+    // copy as soon as we have taken it, but the capture screen still needs the
+    // text after that point.
+    var pendingCapture by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(sharedText) {
         if (!sharedText.isNullOrBlank()) {
-            navController.navigate(Routes.NEW)
+            pendingCapture = sharedText
             onSharedTextConsumed()
+            navController.navigate(Routes.NEW)
         }
     }
 
@@ -283,10 +293,14 @@ private fun LoopGuardNavigation(
                 EditorScreen(
                     existing = null,
                     today = state.today,
-                    prefillText = sharedText,
-                    onBack = { navController.popBackStack() },
+                    prefillText = pendingCapture,
+                    onBack = {
+                        pendingCapture = null
+                        navController.popBackStack()
+                    },
                     onSave = { loop ->
                         viewModel.create(loop)
+                        pendingCapture = null
                         navController.popBackStack()
                     },
                 )
