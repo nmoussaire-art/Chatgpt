@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LoopGuard</string>
+    <string name="notification_channel_reminders">Loop reminders</string>
+    <string name="notification_channel_reminders_desc">Daily nudges for loops that are due, overdue or going quiet.</string>
+    <string name="notification_channel_digest">Daily digest</string>
+    <string name="notification_channel_digest_desc">A single morning summary of what needs your attention.</string>
+</resources>

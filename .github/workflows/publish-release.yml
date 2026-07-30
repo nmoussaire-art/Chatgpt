@@ -1,0 +1,52 @@
+name: Publish release
+
+# Creates a GitHub Release from the signed APK committed under dist/ when a
+# v* tag is pushed. The APK is signed before it is committed, so this job
+# needs no signing secrets - it only publishes what is already verified.
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to publish (e.g. v2.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve the tag and locate the APK
+        id: info
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+          APK="dist/LoopGuard-v${VERSION}.apk"
+          test -f "$APK" || { echo "::error::$APK not found"; exit 1; }
+          echo "tag=$TAG"        >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION">> "$GITHUB_OUTPUT"
+          echo "apk=$APK"        >> "$GITHUB_OUTPUT"
+
+      - name: Verify the APK signature before publishing
+        run: |
+          BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$BUILD_TOOLS/apksigner" verify --print-certs "${{ steps.info.outputs.apk }}"
+
+      - name: Create or update the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ steps.info.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${{ steps.info.outputs.apk }}" --clobber
+          else
+            gh release create "$TAG" "${{ steps.info.outputs.apk }}" \
+              --title "LoopGuard ${{ steps.info.outputs.version }}" \
+              --notes-file .github/release-notes.md
+          fi
