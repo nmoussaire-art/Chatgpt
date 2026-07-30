@@ -72,31 +72,49 @@ jobs:
           LOOPGUARD_KEY_PASSWORD: ${{ secrets.LOOPGUARD_KEY_PASSWORD }}
         run: ./gradlew :app:assembleRelease --stacktrace
 
-      - name: Verify the signature
+      # Without signing secrets, AGP emits `app-release-unsigned.apk` rather
+      # than `app-release.apk`, so the output is located rather than assumed.
+      - name: Verify and name the APK
+        id: apk
         run: |
-          APK=app/build/outputs/apk/release/app-release.apk
+          APK=$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' | head -1)
+          if [ -z "$APK" ]; then
+            echo "::error::assembleRelease produced no APK"
+            exit 1
+          fi
+          echo "Built: $APK"
+
           BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
-          "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
           "$BUILD_TOOLS/aapt2" dump badging "$APK" | head -3
 
-      - name: Name the artefact after the version
-        id: rename
-        run: |
           VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release.apk "dist/LoopGuard-v${VERSION}.apk"
+
+          case "$APK" in
+            *unsigned*)
+              echo "::warning::No signing secrets configured, so this APK is UNSIGNED and Android will refuse to install it. See docs/SIGNING.md to add the four LOOPGUARD_* secrets."
+              NAME="LoopGuard-v${VERSION}-unsigned.apk"
+              ;;
+            *)
+              "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK"
+              NAME="LoopGuard-v${VERSION}.apk"
+              ;;
+          esac
+
+          cp "$APK" "dist/$NAME"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "apk=dist/LoopGuard-v${VERSION}.apk" >> "$GITHUB_OUTPUT"
+          echo "name=${NAME%.apk}" >> "$GITHUB_OUTPUT"
+          echo "apk=dist/$NAME" >> "$GITHUB_OUTPUT"
 
       - name: Upload the APK as a build artefact
         uses: actions/upload-artifact@v4
         with:
-          name: LoopGuard-v${{ steps.rename.outputs.version }}
-          path: ${{ steps.rename.outputs.apk }}
+          name: ${{ steps.apk.outputs.name }}
+          path: ${{ steps.apk.outputs.apk }}
           retention-days: 90
 
       - name: Attach the APK to the release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" "${{ steps.rename.outputs.apk }}" --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" "${{ steps.apk.outputs.apk }}" --clobber
