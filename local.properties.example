@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------------------
+# OnTime Quant — local configuration
+#
+# Copy to `local.properties` (which is git-ignored) and fill in what you have.
+# Every key below is OPTIONAL. With none of them the app runs in demo mode,
+# which exercises the real forecasting engine over a built-in Abu Dhabi journey.
+#
+# These values are injected as BuildConfig fields at compile time. Environment
+# variables of the same names also work, which is what CI should use.
+# ---------------------------------------------------------------------------
+
+# Path to your Android SDK. Android Studio writes this for you.
+# sdk.dir=/Users/you/Library/Android/sdk
+
+# Google Routes API v2 — traffic-aware journey durations.
+# Enable "Routes API" in Google Cloud, then restrict the key to Android apps
+# with this package name and your signing SHA-1.
+# Absent  ->  demo routing, and demo mode cannot be switched off.
+MAPS_API_KEY=
+
+# Google Places API (New) — destination search and address resolution.
+# Enable "Places API (New)" in Google Cloud.
+# Absent  ->  offline gazetteer of Abu Dhabi landmarks.
+PLACES_API_KEY=
+
+# Ticketmaster Discovery API — nearby-event traffic risk.
+# https://developer.ticketmaster.com/
+# Absent  ->  event risk is excluded, and the app says so on screen.
+TICKETMASTER_API_KEY=
+
+# Open-Meteo needs no key and is used automatically whenever demo mode is off.

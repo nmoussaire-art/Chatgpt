@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OnTime Quant</string>
+    <string name="channel_departure_name">Departure alerts</string>
+    <string name="channel_departure_description">Tells you when to leave, and when the forecast changes materially.</string>
+    <string name="channel_forecast_name">Forecast updates</string>
+    <string name="channel_forecast_description">Quiet updates when traffic conditions change your recommended departure.</string>
+</resources>

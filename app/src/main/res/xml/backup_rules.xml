@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Trip history and learned model state stay on the device. They are excluded from
+  cloud backup so a user's movement history is never copied off-device implicitly.
+  Preferences are small and non-sensitive, so they are allowed.
+-->
+<full-backup-content>
+    <exclude domain="database" path="ontime-quant.db" />
+    <exclude domain="database" path="ontime-quant.db-shm" />
+    <exclude domain="database" path="ontime-quant.db-wal" />
+</full-backup-content>

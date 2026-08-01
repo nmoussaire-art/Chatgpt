@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OnTime Quant mark: a probability gauge (an arc that is part-filled, never full)
+  with a clock hand resting on the filled edge. Time, movement and confidence,
+  without a robot or a sparkle in sight.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Unfilled remainder of the gauge -->
+    <path
+        android:pathData="M38.44,38.44 A22,22 0 1 1 38.44,69.56"
+        android:strokeColor="#4D7FD4C8"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <!-- Filled portion: the confidence you actually have -->
+    <path
+        android:pathData="M38.44,38.44 A22,22 0 1 1 63.30,73.94"
+        android:strokeColor="#FF54C7B8"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <!-- Hand -->
+    <path
+        android:pathData="M54,54 L63.18,40.89"
+        android:strokeColor="#FFF2F7F6"
+        android:strokeWidth="5.5"
+        android:strokeLineCap="round" />
+
+    <!-- Pivot -->
+    <path
+        android:pathData="M54,50.4 a3.6,3.6 0 1 0 0.01,0 z"
+        android:fillColor="#FFF2F7F6" />
+</vector>

@@ -1,0 +1,29 @@
+# Secrets — never commit
+local.properties
+*.jks
+*.keystore
+!debug.keystore
+
+# Build output
+build/
+.gradle/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+out/
+
+# Roborazzi comparison output (the recorded screenshots ARE committed)
+**/build/outputs/roborazzi/
+*_compare.png
+*_actual.png
+.kotlin/
