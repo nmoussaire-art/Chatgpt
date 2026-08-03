@@ -1,0 +1,761 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "4de7a3ac86eb4b4ff600b959f11ff7a5",
+    "entities": [
+      {
+        "tableName": "observations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestampMs` INTEGER NOT NULL, `elapsedRealtimeMs` INTEGER NOT NULL, `bootSessionId` INTEGER NOT NULL, `batteryPercent` REAL NOT NULL, `rawLevel` INTEGER NOT NULL, `rawScale` INTEGER NOT NULL, `chargeCounterMicroAh` INTEGER, `currentMicroA` INTEGER, `averageCurrentMicroA` INTEGER, `energyNanoWh` INTEGER, `voltageMv` INTEGER, `temperatureDeciC` INTEGER, `isCharging` INTEGER NOT NULL, `chargingStatus` TEXT NOT NULL, `plugType` TEXT NOT NULL, `batteryHealth` TEXT NOT NULL, `chargingPolicy` TEXT, `powerSaveEnabled` INTEGER NOT NULL, `thermalStatus` TEXT NOT NULL, `screenInteractive` INTEGER NOT NULL, `networkType` TEXT NOT NULL, `bluetoothState` TEXT NOT NULL, `recentScreenTimeMs` INTEGER, `recentForegroundUsageMs` INTEGER, `dominantUsageCategory` TEXT, `quality` TEXT NOT NULL, `notes` TEXT NOT NULL, `source` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestampMs",
+            "columnName": "timestampMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elapsedRealtimeMs",
+            "columnName": "elapsedRealtimeMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bootSessionId",
+            "columnName": "bootSessionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batteryPercent",
+            "columnName": "batteryPercent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawLevel",
+            "columnName": "rawLevel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawScale",
+            "columnName": "rawScale",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargeCounterMicroAh",
+            "columnName": "chargeCounterMicroAh",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "currentMicroA",
+            "columnName": "currentMicroA",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "averageCurrentMicroA",
+            "columnName": "averageCurrentMicroA",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "energyNanoWh",
+            "columnName": "energyNanoWh",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "voltageMv",
+            "columnName": "voltageMv",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "temperatureDeciC",
+            "columnName": "temperatureDeciC",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "isCharging",
+            "columnName": "isCharging",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargingStatus",
+            "columnName": "chargingStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plugType",
+            "columnName": "plugType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batteryHealth",
+            "columnName": "batteryHealth",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargingPolicy",
+            "columnName": "chargingPolicy",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "powerSaveEnabled",
+            "columnName": "powerSaveEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thermalStatus",
+            "columnName": "thermalStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "screenInteractive",
+            "columnName": "screenInteractive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "networkType",
+            "columnName": "networkType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bluetoothState",
+            "columnName": "bluetoothState",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recentScreenTimeMs",
+            "columnName": "recentScreenTimeMs",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recentForegroundUsageMs",
+            "columnName": "recentForegroundUsageMs",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "dominantUsageCategory",
+            "columnName": "dominantUsageCategory",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "quality",
+            "columnName": "quality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_observations_timestampMs",
+            "unique": false,
+            "columnNames": [
+              "timestampMs"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_observations_timestampMs` ON `${TABLE_NAME}` (`timestampMs`)"
+          },
+          {
+            "name": "index_observations_bootSessionId_timestampMs",
+            "unique": false,
+            "columnNames": [
+              "bootSessionId",
+              "timestampMs"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_observations_bootSessionId_timestampMs` ON `${TABLE_NAME}` (`bootSessionId`, `timestampMs`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "model_cells",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`namespace` TEXT NOT NULL, `cellKey` TEXT NOT NULL, `metric` TEXT NOT NULL, `mean` REAL NOT NULL, `variance` REAL NOT NULL, `weight` REAL NOT NULL, `rawSamples` INTEGER NOT NULL, `lastUpdateMs` INTEGER NOT NULL, PRIMARY KEY(`namespace`, `cellKey`, `metric`))",
+        "fields": [
+          {
+            "fieldPath": "namespace",
+            "columnName": "namespace",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cellKey",
+            "columnName": "cellKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "metric",
+            "columnName": "metric",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mean",
+            "columnName": "mean",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "variance",
+            "columnName": "variance",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weight",
+            "columnName": "weight",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawSamples",
+            "columnName": "rawSamples",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdateMs",
+            "columnName": "lastUpdateMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "namespace",
+            "cellKey",
+            "metric"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "regime_transitions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`fromRegime` TEXT NOT NULL, `toRegime` TEXT NOT NULL, `decayedCount` REAL NOT NULL, `lastUpdateMs` INTEGER NOT NULL, PRIMARY KEY(`fromRegime`, `toRegime`))",
+        "fields": [
+          {
+            "fieldPath": "fromRegime",
+            "columnName": "fromRegime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toRegime",
+            "columnName": "toRegime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "decayedCount",
+            "columnName": "decayedCount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdateMs",
+            "columnName": "lastUpdateMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "fromRegime",
+            "toRegime"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "residuals",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `createdAtMs` INTEGER NOT NULL, `horizonMinutes` REAL NOT NULL, `residualPercentPoints` REAL NOT NULL, `residualPercentPerHour` REAL NOT NULL, `regime` TEXT NOT NULL, `wasCharging` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAtMs",
+            "columnName": "createdAtMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "horizonMinutes",
+            "columnName": "horizonMinutes",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "residualPercentPoints",
+            "columnName": "residualPercentPoints",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "residualPercentPerHour",
+            "columnName": "residualPercentPerHour",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "regime",
+            "columnName": "regime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wasCharging",
+            "columnName": "wasCharging",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "forecast_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `issuedAtMs` INTEGER NOT NULL, `targetMs` INTEGER NOT NULL, `horizonMinutes` REAL NOT NULL, `batteryPercentAtIssue` REAL NOT NULL, `predictedMedian` REAL NOT NULL, `predictedP10` REAL NOT NULL, `predictedP25` REAL NOT NULL, `predictedP75` REAL NOT NULL, `predictedP90` REAL NOT NULL, `predictedSurvivalProbability` REAL NOT NULL, `reservePercent` REAL NOT NULL, `maturity` TEXT NOT NULL, `wasChargingAtIssue` INTEGER NOT NULL, `actualPercent` REAL, `actualWasCharging` INTEGER, `evaluatedAtMs` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "issuedAtMs",
+            "columnName": "issuedAtMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetMs",
+            "columnName": "targetMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "horizonMinutes",
+            "columnName": "horizonMinutes",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batteryPercentAtIssue",
+            "columnName": "batteryPercentAtIssue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "predictedMedian",
+            "columnName": "predictedMedian",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "predictedP10",
+            "columnName": "predictedP10",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "predictedP25",
+            "columnName": "predictedP25",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "predictedP75",
+            "columnName": "predictedP75",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "predictedP90",
+            "columnName": "predictedP90",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "predictedSurvivalProbability",
+            "columnName": "predictedSurvivalProbability",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reservePercent",
+            "columnName": "reservePercent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maturity",
+            "columnName": "maturity",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wasChargingAtIssue",
+            "columnName": "wasChargingAtIssue",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "actualPercent",
+            "columnName": "actualPercent",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "actualWasCharging",
+            "columnName": "actualWasCharging",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "evaluatedAtMs",
+            "columnName": "evaluatedAtMs",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "capability_evidence",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `samples` INTEGER NOT NULL, `currentNowPresent` INTEGER NOT NULL, `currentNowAbsent` INTEGER NOT NULL, `currentAveragePresent` INTEGER NOT NULL, `currentAverageAbsent` INTEGER NOT NULL, `chargeCounterPresent` INTEGER NOT NULL, `chargeCounterAbsent` INTEGER NOT NULL, `energyPresent` INTEGER NOT NULL, `energyAbsent` INTEGER NOT NULL, `voltagePresent` INTEGER NOT NULL, `voltageAbsent` INTEGER NOT NULL, `temperaturePresent` INTEGER NOT NULL, `temperatureAbsent` INTEGER NOT NULL, `thermalPresent` INTEGER NOT NULL, `thermalAbsent` INTEGER NOT NULL, `chargingPolicyPresent` INTEGER NOT NULL, `chargingPolicyAbsent` INTEGER NOT NULL, `currentMicroampLike` INTEGER NOT NULL, `currentMilliampLike` INTEGER NOT NULL, `currentPositiveWhileCharging` INTEGER NOT NULL, `currentNegativeWhileCharging` INTEGER NOT NULL, `currentPositiveWhileDischarging` INTEGER NOT NULL, `currentNegativeWhileDischarging` INTEGER NOT NULL, `smallestPercentStep` REAL NOT NULL, `designCapacityMilliAh` REAL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "samples",
+            "columnName": "samples",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentNowPresent",
+            "columnName": "currentNowPresent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentNowAbsent",
+            "columnName": "currentNowAbsent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentAveragePresent",
+            "columnName": "currentAveragePresent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentAverageAbsent",
+            "columnName": "currentAverageAbsent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargeCounterPresent",
+            "columnName": "chargeCounterPresent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargeCounterAbsent",
+            "columnName": "chargeCounterAbsent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyPresent",
+            "columnName": "energyPresent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyAbsent",
+            "columnName": "energyAbsent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "voltagePresent",
+            "columnName": "voltagePresent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "voltageAbsent",
+            "columnName": "voltageAbsent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temperaturePresent",
+            "columnName": "temperaturePresent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "temperatureAbsent",
+            "columnName": "temperatureAbsent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thermalPresent",
+            "columnName": "thermalPresent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thermalAbsent",
+            "columnName": "thermalAbsent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargingPolicyPresent",
+            "columnName": "chargingPolicyPresent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargingPolicyAbsent",
+            "columnName": "chargingPolicyAbsent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentMicroampLike",
+            "columnName": "currentMicroampLike",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentMilliampLike",
+            "columnName": "currentMilliampLike",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentPositiveWhileCharging",
+            "columnName": "currentPositiveWhileCharging",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentNegativeWhileCharging",
+            "columnName": "currentNegativeWhileCharging",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentPositiveWhileDischarging",
+            "columnName": "currentPositiveWhileDischarging",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentNegativeWhileDischarging",
+            "columnName": "currentNegativeWhileDischarging",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "smallestPercentStep",
+            "columnName": "smallestPercentStep",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "designCapacityMilliAh",
+            "columnName": "designCapacityMilliAh",
+            "affinity": "REAL",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "precision_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `startedAtMs` INTEGER NOT NULL, `plannedDurationMs` INTEGER NOT NULL, `endedAtMs` INTEGER, `sampleCount` INTEGER NOT NULL, `startPercent` REAL NOT NULL, `endPercent` REAL, `completed` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtMs",
+            "columnName": "startedAtMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plannedDurationMs",
+            "columnName": "plannedDurationMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAtMs",
+            "columnName": "endedAtMs",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sampleCount",
+            "columnName": "sampleCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startPercent",
+            "columnName": "startPercent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endPercent",
+            "columnName": "endPercent",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "completed",
+            "columnName": "completed",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "notification_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`triggerKey` TEXT NOT NULL, `lastFiredAtMs` INTEGER NOT NULL, `lastValue` REAL NOT NULL, PRIMARY KEY(`triggerKey`))",
+        "fields": [
+          {
+            "fieldPath": "triggerKey",
+            "columnName": "triggerKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastFiredAtMs",
+            "columnName": "lastFiredAtMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastValue",
+            "columnName": "lastValue",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "triggerKey"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4de7a3ac86eb4b4ff600b959f11ff7a5')"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BatteryCast Quant</string>
+    <string name="app_tagline">Will my phone last?</string>
+
+    <string name="notification_channel_alerts_name">Battery survival alerts</string>
+    <string name="notification_channel_alerts_description">
+        Sent only when the chance of reaching your target changes materially, or when charging
+        advice changes.
+    </string>
+    <string name="notification_channel_precision_name">Precision measurement session</string>
+    <string name="notification_channel_precision_description">
+        Shown for the duration of a precision session you started, so it is never running
+        unnoticed.
+    </string>
+
+    <string name="privacy_statement">All battery observations and forecasts remain on your device.</string>
+</resources>

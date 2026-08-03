@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+      BatteryCast Quant is an offline application.
+
+      There is no INTERNET permission, so the process is structurally incapable of transmitting a
+      battery observation, a forecast, or a calendar event anywhere. The removal directive below
+      makes that guarantee survive manifest merging: if any dependency ever declares INTERNET, the
+      merger strips it rather than silently granting it, and the `verifyNoNetworkPermission`
+      Gradle task fails the build if this line is ever deleted.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+
+    <!-- Re-arms periodic observation work after a restart; without it the history gains a hole. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Transport type of the active network only. No traffic, addresses or SSIDs are read. -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Threshold alerts. Optional at runtime; the app is fully usable if it is denied. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Only for a user-started precision session, which is time-boxed and stops itself. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!-- Optional: lets the user pick a calendar event as a battery target. Never uploaded. -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+
+    <!--
+      Optional and granted only from system settings, never by a runtime dialog. Used exclusively
+      for aggregate foreground time and a broad app category; package names are never stored.
+    -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <application
+        android:name=".BatteryCastApplication"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BatteryCast.Splash">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.BatteryCast.Splash"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+          Battery level, power-save and plug changes are the moments that carry the most
+          information, so they are sampled on the spot instead of waiting for the next periodic
+          run. ACTION_BATTERY_CHANGED itself cannot be received by a manifest receiver, so the
+          app listens for the low-frequency battery events here and registers a runtime receiver
+          only while a screen is open.
+        -->
+        <receiver
+            android:name=".telemetry.receiver.BatteryEventReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="android.intent.action.BATTERY_LOW" />
+                <action android:name="android.intent.action.BATTERY_OKAY" />
+                <action android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".telemetry.receiver.BootCompletedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+          Runs only while the user has explicitly started a precision session, shows an ongoing
+          notification for the whole time, and stops itself at the end of the chosen window. It is
+          never used for routine collection.
+        -->
+        <service
+            android:name=".telemetry.precision.PrecisionSessionService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Time-boxed high-cadence battery measurement session started by the user" />
+        </service>
+
+        <!-- Grants a temporary read URI only for a file the user chose to export. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.exports"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- WorkManager is configured through Hilt, so its default initializer is removed. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+    </application>
+</manifest>

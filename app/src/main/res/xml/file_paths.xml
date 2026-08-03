@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Scoped location used only for a user-initiated data export. -->
+<paths>
+    <cache-path name="exports" path="exports/" />
+</paths>

@@ -1,0 +1,20 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+/app/build/
+/build/
+
+# Release signing material must never enter version control.
+keystore.properties
+*.jks
+*.keystore
+
+# Kotlin incremental compilation state
+.kotlin/
