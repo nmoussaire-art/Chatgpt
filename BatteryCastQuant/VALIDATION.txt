@@ -1,0 +1,38 @@
+BatteryCast Quant validation summary
+Date: 2026-08-03
+
+Quantitative core
+PASS - Production-data boundary across 34 production files
+PASS - No android.permission.INTERNET
+PASS - No fake/demo/sample/mock telemetry provider in production
+PASS - Production Hilt binding targets AndroidBatteryTelemetrySource
+PASS - No fixed Monte Carlo seed supplied by production DI
+PASS - Platform-neutral Kotlin quantitative core compilation
+PASS - Deterministic 2,000-path forecasting smoke test
+PASS - Forecast quantile ordering and 0%-100% bounds
+PASS - Heavy-use scenario does not improve over baseline
+PASS - Sensor-derived microAh/mWh drain calculations
+PASS - Reboot-aware segmentation
+PASS - Cold-start honesty
+PASS - Observed charging curve and latest-safe-charge search
+PASS - Android Kotlin syntax parse
+PASS - Android manifest/resource XML parse (9 files)
+
+Android build (JDK 17, SDK platform 35, build-tools 35.0.0, Gradle 8.11.1)
+PASS - :app:assembleDebug
+PASS - :app:assembleRelease with R8 minification and resource shrinking
+PASS - :forecasting:test (22 tests, 0 failures)
+PASS - :app:testDebugUnitTest (2 tests, 0 failures)
+PASS - :app:lintDebug (0 errors, abortOnError = true)
+PASS - :app:lintVitalRelease (0 errors)
+PASS - Built APK declares no android.permission.INTERNET
+PASS - Release APK signature verified (schemes v2 and v3)
+PASS - R8 output retains Room and Hilt generated classes
+
+Five compilation and lint defects in the packaged sources had to be fixed to
+reach this state. They are listed in BUILD_STATUS.md.
+
+Not performed in this runtime:
+- Launching the app on a device or emulator, and :app:connectedAndroidTest.
+Reason: no hardware virtualisation is available (/dev/kvm is absent), so no
+emulator can be booted. Runtime behaviour is therefore unverified.

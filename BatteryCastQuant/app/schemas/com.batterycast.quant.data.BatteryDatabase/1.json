@@ -1,0 +1,289 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "6bf410e3a70b592e5b3ecea4426ea7db",
+    "entities": [
+      {
+        "tableName": "battery_observations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER NOT NULL, `elapsedRealtimeMs` INTEGER NOT NULL, `bootCount` INTEGER, `batteryPercent` REAL NOT NULL, `chargeCounterMicroAh` INTEGER, `currentMicroA` INTEGER, `averageCurrentMicroA` INTEGER, `energyNanoWh` INTEGER, `voltageMv` INTEGER, `temperatureDeciC` INTEGER, `isCharging` INTEGER NOT NULL, `plugType` TEXT NOT NULL, `batteryHealth` INTEGER, `chargingStatus` INTEGER, `chargingPolicy` INTEGER, `powerSaveEnabled` INTEGER NOT NULL, `thermalStatus` INTEGER, `screenInteractive` INTEGER NOT NULL, `networkType` TEXT NOT NULL, `bluetoothEnabled` INTEGER, `recentScreenTimeMs` INTEGER, `recentForegroundUsageMs` INTEGER, `usageRegime` TEXT NOT NULL, `overallQuality` TEXT NOT NULL, `source` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "elapsedRealtimeMs",
+            "columnName": "elapsedRealtimeMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bootCount",
+            "columnName": "bootCount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "batteryPercent",
+            "columnName": "batteryPercent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chargeCounterMicroAh",
+            "columnName": "chargeCounterMicroAh",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "currentMicroA",
+            "columnName": "currentMicroA",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "averageCurrentMicroA",
+            "columnName": "averageCurrentMicroA",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "energyNanoWh",
+            "columnName": "energyNanoWh",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "voltageMv",
+            "columnName": "voltageMv",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "temperatureDeciC",
+            "columnName": "temperatureDeciC",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isCharging",
+            "columnName": "isCharging",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "plugType",
+            "columnName": "plugType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batteryHealth",
+            "columnName": "batteryHealth",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "chargingStatus",
+            "columnName": "chargingStatus",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "chargingPolicy",
+            "columnName": "chargingPolicy",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "powerSaveEnabled",
+            "columnName": "powerSaveEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "thermalStatus",
+            "columnName": "thermalStatus",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "screenInteractive",
+            "columnName": "screenInteractive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "networkType",
+            "columnName": "networkType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bluetoothEnabled",
+            "columnName": "bluetoothEnabled",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "recentScreenTimeMs",
+            "columnName": "recentScreenTimeMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "recentForegroundUsageMs",
+            "columnName": "recentForegroundUsageMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "usageRegime",
+            "columnName": "usageRegime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "overallQuality",
+            "columnName": "overallQuality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_battery_observations_timestamp",
+            "unique": true,
+            "columnNames": [
+              "timestamp"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_battery_observations_timestamp` ON `${TABLE_NAME}` (`timestamp`)"
+          }
+        ]
+      },
+      {
+        "tableName": "forecast_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `generatedAt` INTEGER NOT NULL, `targetTime` INTEGER NOT NULL, `reservePercent` INTEGER NOT NULL, `medianAtTarget` REAL, `p05` REAL, `p10` REAL, `p25` REAL, `p75` REAL, `p90` REAL, `p95` REAL, `survivalProbability` REAL, `predictedTimeTo20Median` INTEGER, `actualAtTarget` REAL, `actualTimeTo20` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "generatedAt",
+            "columnName": "generatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetTime",
+            "columnName": "targetTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reservePercent",
+            "columnName": "reservePercent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "medianAtTarget",
+            "columnName": "medianAtTarget",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "p05",
+            "columnName": "p05",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "p10",
+            "columnName": "p10",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "p25",
+            "columnName": "p25",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "p75",
+            "columnName": "p75",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "p90",
+            "columnName": "p90",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "p95",
+            "columnName": "p95",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "survivalProbability",
+            "columnName": "survivalProbability",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "predictedTimeTo20Median",
+            "columnName": "predictedTimeTo20Median",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "actualAtTarget",
+            "columnName": "actualAtTarget",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "actualTimeTo20",
+            "columnName": "actualTimeTo20",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_forecast_records_targetTime",
+            "unique": false,
+            "columnNames": [
+              "targetTime"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_forecast_records_targetTime` ON `${TABLE_NAME}` (`targetTime`)"
+          },
+          {
+            "name": "index_forecast_records_generatedAt",
+            "unique": false,
+            "columnNames": [
+              "generatedAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_forecast_records_generatedAt` ON `${TABLE_NAME}` (`generatedAt`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6bf410e3a70b592e5b3ecea4426ea7db')"
+    ]
+  }
+}

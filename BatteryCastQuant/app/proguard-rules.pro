@@ -1,0 +1,2 @@
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep @dagger.hilt.android.HiltAndroidApp class * { *; }

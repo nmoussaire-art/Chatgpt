@@ -1,0 +1,2 @@
+af5d6746465299dd9524768c1cb4647eb8e91d95e3c3e1e070601da2976f4942  BatteryCastQuant-1.0.0-debug.apk
+d41b7ffdbfa2954b336b6ee580bef2ae016427db5c2b91e8c625b03aaf4c6d14  BatteryCastQuant-1.0.0-release.apk
