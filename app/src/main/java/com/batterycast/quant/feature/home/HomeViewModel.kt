@@ -1,4 +1,4 @@
-package com.batterycast.quant.feature.dashboard
+package com.batterycast.quant.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DashboardViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val coordinator: ForecastCoordinator,
     private val calendarEventProvider: CalendarEventProvider,
 ) : ViewModel() {

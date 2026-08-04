@@ -29,17 +29,20 @@ There is no server, no account, no API key, and no network permission.
 
 ## What it does
 
-| Screen | Question it answers |
+| Destination | Question it answers |
 |---|---|
-| **Home** | Will my phone last until my target? What will I have then? |
-| **Curve** | What does the whole forecast look like, with its uncertainty? |
-| **Chances** | How likely is it at each hour, and under different usage? |
-| **Charge planner** | What is the latest safe time to start charging? |
-| **Scenario laboratory** | What would 45 minutes of navigation cost me? |
-| **What changed** | Why did the forecast move? |
-| **History** | What actually happened, and how did past forecasts turn out? |
-| **Model accuracy** | How wrong has this app typically been? |
-| **Permissions and privacy** | What is collected, what leaves the phone, how do I delete it? |
+| **Home** | Will your phone last — and what should you do about it? |
+| **Forecast** | What does the whole curve look like, and what are the numbers underneath? |
+| **Scenarios** | What would 45 minutes of navigation cost me? |
+| **Charge** | When is the latest I can plug in? |
+| Settings → **What changed** | Why did the forecast move? |
+| Settings → **History** | What actually happened, and how did past forecasts turn out? |
+| Settings → **Model accuracy** | How wrong has this app typically been? |
+| Settings → **Privacy** | What is collected, what leaves the phone, how do I delete it? |
+
+The four tabs are named for user intentions. Every quantitative output — percentiles, intervals,
+path counts, fitted drain rates — lives one disclosure below the plain-language answer rather than
+competing with it. See [`docs/DESIGN_V2.md`](docs/DESIGN_V2.md).
 
 The forecasting engine underneath is real:
 
@@ -117,7 +120,7 @@ nothing in `src/main` — which is itself one of the assertions.
 export ANDROID_HOME=/path/to/android-sdk
 
 ./gradlew :app:assembleDebug          # debug APK
-./gradlew :app:test                   # unit tests (~220)
+./gradlew :app:test                   # unit tests (232)
 ./gradlew :app:check                  # unit tests + all production-purity gates
 ./gradlew :app:connectedAndroidTest   # instrumentation tests (needs a device or emulator)
 ```
@@ -193,7 +196,7 @@ model → `ForecastEngine` assembles a snapshot → `MonteCarloSimulator` produc
 
 | Suite | Location | Runs on |
 |---|---|---|
-| Unit (~220 tests) | `src/test` | JVM, no device |
+| Unit (232 tests) | `src/test` | JVM, no device |
 | Instrumentation | `src/androidTest` | device or emulator |
 | Compose UI | `src/androidTest/…/ui` | device or emulator |
 
@@ -226,6 +229,8 @@ Properties asserted rather than examples checked:
 | [`docs/RELEASE.md`](docs/RELEASE.md) | Signed release-build procedure |
 | [`docs/MANUAL_TESTING.md`](docs/MANUAL_TESTING.md) | Exercising the app against live and emulated battery state |
 | [`docs/NO_SAMPLE_DATA.md`](docs/NO_SAMPLE_DATA.md) | The production-data guarantee and how it is enforced |
+| [`docs/DESIGN_V2.md`](docs/DESIGN_V2.md) | The v2 redesign: what changed and why |
+| [`docs/DESIGN_REVIEW.md`](docs/DESIGN_REVIEW.md) | The critique v2 was built from |
 
 ---
 
@@ -253,19 +258,19 @@ in `core/ui/chart` and are ordinary Compose composables.
 | # | Deliverable | Status |
 |---|---|---|
 | 1 | Full Kotlin source | Complete |
-| 2 | Functional Compose interface | Complete — 9 screens |
+| 2 | Functional Compose interface | Complete — 4 tabs, 4 detail screens, v2 redesign |
 | 3 | Live Android battery integration | Complete |
 | 4 | On-device quantitative forecasting | Complete |
 | 5 | Room database | Complete, 8 tables, schema exported |
 | 6 | Background observation | Complete — WorkManager + event receivers |
 | 7 | Battery-conscious implementation | Complete — no wake locks acquired, no persistent service |
-| 8 | Unit tests | Complete — ~220, all passing |
+| 8 | Unit tests | Complete — 232, all passing |
 | 9 | Instrumentation tests | Written and compiling; **not executed here** (see below) |
 | 10 | Compose UI tests | Written and compiling; **not executed here** (see below) |
 | 11 | README with build instructions | This file |
 | 12 | Quantitative methodology docs | `docs/METHODOLOGY.md` |
 | 13 | Permission and privacy docs | `docs/PRIVACY.md` |
-| 14 | App icon and splash screen | Complete — adaptive icon with themed variant |
+| 14 | App icon and splash screen | Complete — v2 forecast-curve mark, adaptive + themed |
 | 15 | Screenshots from live battery data | **Not produced here** (see below) |
 | 16 | Debug APK | Built — `app/build/outputs/apk/debug/app-debug.apk` |
 | 17 | Signed release procedure | `docs/RELEASE.md`; unsigned release APK builds at 1.5 MB |

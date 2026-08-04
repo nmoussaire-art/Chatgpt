@@ -7,12 +7,14 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Insights
+import androidx.compose.material.icons.rounded.QueryStats
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -33,13 +35,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.batterycast.quant.core.ui.components.BatteryCastCard
+import com.batterycast.quant.core.ui.components.DetailScaffold
+import com.batterycast.quant.core.ui.components.InfoCard
+import com.batterycast.quant.core.ui.components.NavigationRow
 import com.batterycast.quant.core.ui.components.SectionHeader
-import com.batterycast.quant.core.ui.components.StatRow
-import com.batterycast.quant.core.ui.components.StatusChip
+import com.batterycast.quant.core.ui.components.CompactRow
+import com.batterycast.quant.core.ui.components.InlineStatus
 import com.batterycast.quant.core.ui.format.Formatters
 import com.batterycast.quant.core.ui.theme.BatteryCastTheme
 import com.batterycast.quant.telemetry.model.FieldSupport
+import com.batterycast.quant.feature.Routes
 import com.batterycast.quant.telemetry.work.ObservationScheduler
 import kotlin.math.roundToInt
 
@@ -50,7 +55,11 @@ import kotlin.math.roundToInt
  * because both of those are true and the user deserves to decide on the facts.
  */
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsScreen(
+    onBack: () -> Unit,
+    onNavigate: (String) -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+) {
     val context = LocalContext.current
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val permissions by viewModel.permissions.collectAsStateWithLifecycle()
@@ -69,20 +78,36 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
 
     LaunchedEffect(Unit) { viewModel.refresh() }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+    DetailScaffold(
+        title = "Settings",
+        subtitle = "Permissions, privacy and how BatteryCast measures.",
+        onBack = onBack,
     ) {
         item {
-            SectionHeader(
-                title = "Permissions and privacy",
-                subtitle = "All battery observations and forecasts remain on your device.",
-            )
+            Column {
+                NavigationRow(
+                    title = "What changed",
+                    subtitle = "Why the forecast moved, with the numbers",
+                    icon = Icons.Rounded.Insights,
+                    onClick = { onNavigate(Routes.WHAT_CHANGED) },
+                )
+                NavigationRow(
+                    title = "Battery history",
+                    subtitle = "Levels, charging sessions, unusual drain",
+                    icon = Icons.Rounded.History,
+                    onClick = { onNavigate(Routes.HISTORY) },
+                )
+                NavigationRow(
+                    title = "Model accuracy",
+                    subtitle = "How past forecasts actually turned out",
+                    icon = Icons.Rounded.QueryStats,
+                    onClick = { onNavigate(Routes.ACCURACY) },
+                )
+            }
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(title = "What leaves your phone")
                 Text(
                     text = "Nothing. BatteryCast holds no internet permission, so the app is " +
@@ -97,15 +122,15 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(
                     title = "Usage access",
                     subtitle = "Optional. The forecast works fully without it.",
                 )
-                StatusChip(
+                InlineStatus(
                     text = if (permissions.usageAccessGranted) "Granted" else "Not granted",
                     color = if (permissions.usageAccessGranted) {
-                        BatteryCastTheme.semanticColors.positive
+                        BatteryCastTheme.semanticColors.healthy
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
@@ -131,15 +156,15 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(
                     title = "Calendar",
                     subtitle = "Optional. Lets you target a real event.",
                 )
-                StatusChip(
+                InlineStatus(
                     text = if (permissions.calendarGranted) "Granted" else "Not granted",
                     color = if (permissions.calendarGranted) {
-                        BatteryCastTheme.semanticColors.positive
+                        BatteryCastTheme.semanticColors.healthy
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
@@ -160,12 +185,12 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(title = "Notifications")
-                StatusChip(
+                InlineStatus(
                     text = if (permissions.notificationsGranted) "Allowed" else "Not allowed",
                     color = if (permissions.notificationsGranted) {
-                        BatteryCastTheme.semanticColors.positive
+                        BatteryCastTheme.semanticColors.healthy
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
@@ -207,7 +232,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(title = "Forecast preferences")
                 Text(
                     text = "Reserve level: ${(settings?.reservePercent ?: 10.0).roundToInt()}%",
@@ -225,7 +250,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                     steps = 5,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                StatRow(
+                CompactRow(
                     label = "Bedtime",
                     supporting = "Used for the 'bedtime' quick target",
                     value = String.format(
@@ -245,24 +270,24 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(
                     title = "Measurement",
                     subtitle = "How often BatteryCast reads the battery.",
                 )
-                StatRow(
+                CompactRow(
                     label = "Background sampling",
                     supporting = "Android may defer background work, so this is a target, not a guarantee",
                     value = "about every ${ObservationScheduler.PERIOD_MINUTES} min",
                 )
-                StatRow(
+                CompactRow(
                     label = "Event sampling",
                     supporting = "Charging start and stop, power-save changes, app opened",
                     value = "immediate",
                 )
-                StatRow(label = "Readings stored", value = "${diagnostics.observationCount}")
+                CompactRow(label = "Readings stored", value = "${diagnostics.observationCount}")
                 if (diagnostics.earliestObservationMs != null) {
-                    StatRow(
+                    CompactRow(
                         label = "Observing since",
                         value = Formatters.dateAndTime(diagnostics.earliestObservationMs),
                     )
@@ -271,7 +296,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(
                     title = "Precision session",
                     subtitle = "A short, high-cadence measurement you start yourself.",
@@ -299,7 +324,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(
                     title = "This device's sensors",
                     subtitle = "Learned from real readings, not assumed from the Android version.",
@@ -313,20 +338,20 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                 SensorRow("Temperature", capabilities.temperature)
                 SensorRow("Thermal status", capabilities.thermalStatus)
                 SensorRow("Charging policy", capabilities.chargingPolicy)
-                StatRow(
+                CompactRow(
                     label = "Current sign convention",
                     value = capabilities.currentSign.name.lowercase().replace('_', ' '),
                 )
-                StatRow(
+                CompactRow(
                     label = "Percentage resolution",
                     value = "${capabilities.percentGranularity} points",
                 )
-                StatRow(label = "Readings assessed", value = "${capabilities.samplesConsidered}")
+                CompactRow(label = "Readings assessed", value = "${capabilities.samplesConsidered}")
             }
         }
 
         item {
-            BatteryCastCard {
+            InfoCard {
                 SectionHeader(title = "Your data")
                 Text(
                     text = "Export writes every stored observation to a CSV file you can share " +
@@ -350,7 +375,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             Text(
                 text = message.orEmpty(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = BatteryCastTheme.semanticColors.positive,
+                color = BatteryCastTheme.semanticColors.healthy,
             )
         }
     }
@@ -384,7 +409,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
 @Composable
 private fun SensorRow(label: String, support: FieldSupport) {
     val semantic = BatteryCastTheme.semanticColors
-    StatRow(
+    CompactRow(
         label = label,
         value = when (support) {
             FieldSupport.SUPPORTED -> "Supported"
@@ -393,7 +418,7 @@ private fun SensorRow(label: String, support: FieldSupport) {
             FieldSupport.UNKNOWN -> "Still assessing"
         },
         valueColor = when (support) {
-            FieldSupport.SUPPORTED -> semantic.positive
+            FieldSupport.SUPPORTED -> semantic.healthy
             FieldSupport.LOW_PRECISION -> semantic.caution
             FieldSupport.UNSUPPORTED -> MaterialTheme.colorScheme.onSurfaceVariant
             FieldSupport.UNKNOWN -> MaterialTheme.colorScheme.onSurfaceVariant

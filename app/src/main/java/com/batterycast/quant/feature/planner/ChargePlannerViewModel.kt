@@ -11,6 +11,7 @@ import com.batterycast.quant.forecasting.planner.ChargePlan
 import com.batterycast.quant.forecasting.planner.ChargePlanRequest
 import com.batterycast.quant.forecasting.planner.ChargePlanner
 import com.batterycast.quant.telemetry.model.PlugType
+import com.batterycast.quant.telemetry.work.ObservationScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +33,7 @@ class ChargePlannerViewModel @Inject constructor(
     private val chargePlanner: ChargePlanner,
     private val calendarEventProvider: CalendarEventProvider,
     private val settingsStore: SettingsStore,
+    private val observationScheduler: ObservationScheduler,
 ) : ViewModel() {
 
     val forecastState: StateFlow<ForecastUiState> = coordinator.state
@@ -47,6 +49,28 @@ class ChargePlannerViewModel @Inject constructor(
 
     private val _computing = MutableStateFlow(false)
     val computing: StateFlow<Boolean> = _computing.asStateFlow()
+
+    /** Start time a reminder is currently scheduled for, so the button can show its own state. */
+    private val _reminderSetFor = MutableStateFlow<Long?>(null)
+    val reminderSetFor: StateFlow<Long?> = _reminderSetFor.asStateFlow()
+
+    /**
+     * Schedules a one-off reminder at the recommended plug-in time.
+     *
+     * The user asked for this one, so it bypasses the threshold and cooldown rules that keep the
+     * automatic alerts quiet.
+     */
+    fun setReminder() {
+        val plan = _plan.value ?: return
+        val startMs = plan.latestStartMs ?: return
+        observationScheduler.scheduleChargeReminder(
+            atMs = startMs,
+            eventLabel = plan.request.eventLabel,
+            targetPercent = plan.request.targetPercent.toInt(),
+            durationMinutes = ((plan.requiredDurationMs ?: 0L) / 60_000L).toInt(),
+        )
+        _reminderSetFor.value = startMs
+    }
 
     fun load() {
         viewModelScope.launch {
@@ -92,6 +116,7 @@ class ChargePlannerViewModel @Inject constructor(
                     plugType = inputs.plugType,
                 ),
             )
+            if (_reminderSetFor.value != _plan.value?.latestStartMs) _reminderSetFor.value = null
             settingsStore.setDesiredBatteryAtTarget(inputs.targetPercent)
             settingsStore.setTargetConfidence(inputs.confidence)
             _computing.value = false

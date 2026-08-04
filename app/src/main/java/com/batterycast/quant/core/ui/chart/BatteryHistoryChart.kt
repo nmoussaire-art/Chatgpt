@@ -74,7 +74,7 @@ fun BatteryHistoryChart(
         listOf(0, 50, 100).forEach { percent ->
             val y = yFor(percent.toDouble())
             drawLine(
-                color = semantic.gridLine,
+                color = semantic.chartGrid,
                 start = Offset(leftPadding, y),
                 end = Offset(size.width, y),
                 strokeWidth = with(density) { 1.dp.toPx() },
@@ -100,7 +100,7 @@ fun BatteryHistoryChart(
                 val from = xFor(chargeStart!!)
                 val to = xFor(observation.timestampMs)
                 drawRect(
-                    color = semantic.chargingAccent.copy(alpha = 0.16f),
+                    color = semantic.healthy.copy(alpha = 0.16f),
                     topLeft = Offset(from, topPadding),
                     size = androidx.compose.ui.geometry.Size((to - from).coerceAtLeast(1f), plotHeight),
                 )

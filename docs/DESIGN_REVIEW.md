@@ -1,5 +1,10 @@
 # Design review — from "credible" to "beautiful"
 
+> **Status: implemented in v2.** Every defect in Part A and every change in Parts B and C except
+> the home-screen widget (C9) has shipped. See `docs/DESIGN_V2.md` for what the redesign actually
+> did and where it went beyond this review.
+
+
 Based on the twelve screenshots from a real device (Samsung, dark theme, large display size).
 
 The honest summary: **the app currently looks like a very well-written settings screen.** Every

@@ -10,82 +10,100 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val LightColorScheme = lightColorScheme(
-    primary = Mint40,
-    onPrimary = Color.White,
-    primaryContainer = Mint90,
-    onPrimaryContainer = Mint10,
-    secondary = Steel50,
-    onSecondary = Color.White,
-    secondaryContainer = Steel90,
-    onSecondaryContainer = Steel10,
-    tertiary = Amber40,
-    onTertiary = Color.White,
-    tertiaryContainer = Amber90,
-    onTertiaryContainer = Amber30,
-    background = Steel99,
-    onBackground = Steel10,
-    surface = Steel99,
-    onSurface = Steel10,
-    surfaceVariant = Steel95,
-    onSurfaceVariant = Steel50,
-    surfaceContainer = Color(0xFFF1F5F9),
-    surfaceContainerHigh = Color(0xFFE9EEF4),
-    surfaceContainerHighest = Color(0xFFE2E8F0),
-    surfaceContainerLow = Color(0xFFF6F9FB),
-    surfaceContainerLowest = Color.White,
-    outline = Steel60,
-    outlineVariant = Steel80,
-    error = Clay40,
-    onError = Color.White,
-    errorContainer = Clay90,
-    onErrorContainer = Clay30,
-)
-
 private val DarkColorScheme = darkColorScheme(
-    primary = Mint70,
-    onPrimary = Mint20,
-    primaryContainer = Mint30,
-    onPrimaryContainer = Mint95,
-    secondary = Steel80,
-    onSecondary = Steel20,
-    secondaryContainer = Steel30,
-    onSecondaryContainer = Steel90,
-    tertiary = Amber70,
-    onTertiary = Amber30,
-    tertiaryContainer = Amber30,
-    onTertiaryContainer = Amber90,
-    background = Steel10,
-    onBackground = Steel95,
-    surface = Steel10,
-    onSurface = Steel95,
-    surfaceVariant = Steel25,
-    onSurfaceVariant = Steel60,
-    surfaceContainer = Steel20,
-    surfaceContainerHigh = Steel25,
-    surfaceContainerHighest = Steel30,
-    surfaceContainerLow = Steel15,
-    surfaceContainerLowest = Color(0xFF070C16),
-    outline = Steel50,
-    outlineVariant = Steel30,
-    error = Clay70,
-    onError = Clay30,
-    errorContainer = Clay30,
-    onErrorContainer = Clay90,
+    primary = Mint,
+    onPrimary = MintInk,
+    primaryContainer = MintDeep,
+    onPrimaryContainer = Color(0xFFCFF9E7),
+    inversePrimary = MintDeep,
+
+    secondary = Forecast,
+    onSecondary = ForecastInk,
+    secondaryContainer = Color(0xFF1B3355),
+    onSecondaryContainer = Color(0xFFCFE0FF),
+
+    tertiary = Amber,
+    onTertiary = AmberInk,
+    tertiaryContainer = Color(0xFF3A2C0C),
+    onTertiaryContainer = Color(0xFFFFE6B0),
+
+    background = Navy900,
+    onBackground = InkPrimary,
+    surface = Navy900,
+    onSurface = InkPrimary,
+    surfaceVariant = Navy600,
+    onSurfaceVariant = InkSecondary,
+
+    surfaceContainerLowest = Navy850,
+    surfaceContainerLow = Navy800,
+    surfaceContainer = Navy700,
+    surfaceContainerHigh = Navy600,
+    surfaceContainerHighest = Navy500,
+
+    outline = Navy400,
+    outlineVariant = Navy500,
+
+    error = Coral,
+    onError = CoralInk,
+    errorContainer = Color(0xFF48201F),
+    onErrorContainer = Color(0xFFFFD9D9),
+
+    scrim = Color(0xCC04090F),
 )
 
-val LocalSemanticColors = staticCompositionLocalOf { LightSemanticColors }
+private val LightColorScheme = lightColorScheme(
+    primary = MintOnPaper,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFC8F3E2),
+    onPrimaryContainer = Color(0xFF00382A),
+    inversePrimary = Mint,
+
+    secondary = ForecastOnPaper,
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFD8E5FF),
+    onSecondaryContainer = Color(0xFF0B2B60),
+
+    tertiary = AmberOnPaper,
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFFCE9C2),
+    onTertiaryContainer = Color(0xFF43300A),
+
+    background = Paper050,
+    onBackground = PaperInkPrimary,
+    surface = Paper050,
+    onSurface = PaperInkPrimary,
+    surfaceVariant = Paper100,
+    onSurfaceVariant = PaperInkSecondary,
+
+    surfaceContainerLowest = Paper000,
+    surfaceContainerLow = Color(0xFFFAFCFE),
+    surfaceContainer = Paper000,
+    surfaceContainerHigh = Paper100,
+    surfaceContainerHighest = Paper200,
+
+    outline = Paper300,
+    outlineVariant = Paper200,
+
+    error = CoralOnPaper,
+    onError = Color.White,
+    errorContainer = Color(0xFFFBDDDB),
+    onErrorContainer = Color(0xFF48100D),
+)
+
+val LocalSemanticColors = staticCompositionLocalOf { DarkSemanticColors }
 
 /**
  * The app theme.
  *
- * Dynamic colour is deliberately *not* used. The mint accent is the app's one piece of visual
- * vocabulary — it is the median forecast line, the probability figure and the confidence chip all
- * at once — and letting the wallpaper recolour it would break the association between the number
- * and the chart it came from.
+ * Dynamic colour is deliberately **not** applied to the brand hues. Mint is simultaneously the
+ * forecast line, the "you're covered" signal and the ring that carries the app's whole identity;
+ * letting the wallpaper recolour it would break the association between the number and the chart
+ * it came from. Neutral surfaces are the app's own navy for the same reason — an instrument reads
+ * as an instrument only if its chassis is consistent.
  */
 @Composable
 fun BatteryCastTheme(
@@ -106,7 +124,19 @@ fun BatteryCastTheme(
         }
     }
 
-    CompositionLocalProvider(LocalSemanticColors provides semanticColors) {
+    // The screenshots that drove this redesign were taken at a large system display size, where
+    // headings wrapped into three lines and chips overflowed. The user's preference is respected —
+    // text still scales — but the ceiling stops the layout from breaking outright at the extremes.
+    val density = LocalDensity.current
+    val cappedDensity = androidx.compose.ui.unit.Density(
+        density = density.density,
+        fontScale = density.fontScale.coerceAtMost(MAX_FONT_SCALE),
+    )
+
+    CompositionLocalProvider(
+        LocalSemanticColors provides semanticColors,
+        LocalDensity provides cappedDensity,
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = BatteryCastTypography,
@@ -121,3 +151,6 @@ object BatteryCastTheme {
     val semanticColors: BatteryCastSemanticColors
         @Composable get() = LocalSemanticColors.current
 }
+
+/** Beyond this the hero ring and the bottom bar cannot hold their layout. */
+private const val MAX_FONT_SCALE = 1.3f

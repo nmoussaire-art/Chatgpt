@@ -101,7 +101,7 @@ class HistoryViewModel @Inject constructor(
                     startPercent = segment.startPercent,
                     endPercent = segment.endPercent,
                     ratePercentPerHour = DrainRateEstimator.chargeRateEstimate(segment)?.ratePerHour,
-                    plugType = segment.plugType.name.lowercase().replaceFirstChar { it.uppercase() },
+                    plugType = segment.plugType.displayName,
                 )
             }
 

@@ -33,6 +33,14 @@ data class BatteryForecast(
     val dataQuality: DataQualityReport,
     val drivers: List<ForecastDriver>,
 ) {
+    /**
+     * What the user should actually do, derived from the simulated paths.
+     *
+     * Computed lazily so the forecast type stays a pure data record and the advice is always in
+     * step with the numbers beside it.
+     */
+    val recommendation: Recommendation by lazy { Recommendations.forForecast(this) }
+
     val isPreliminary: Boolean get() = maturity.isPreliminary
 
     /** Median time until the battery is empty, when the horizon reaches that far. */

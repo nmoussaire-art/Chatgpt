@@ -3,6 +3,7 @@ package com.batterycast.quant.ui
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -35,7 +36,7 @@ class DashboardComposeTest {
 
     @Test
     fun theDashboardAsksTheCentralQuestion() {
-        composeRule.onNodeWithText("Will my phone last?").assertIsDisplayed()
+        composeRule.onNodeWithText("Will your phone last?").assertIsDisplayed()
     }
 
     @Test
@@ -54,13 +55,22 @@ class DashboardComposeTest {
     }
 
     @Test
-    fun thePrivacyStatementIsVisibleOnTheMoreScreen() {
-        composeRule.onNodeWithText("More").performClick()
+    fun thePrivacyStatementIsVisibleOnHome() {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText(
             "All battery observations and forecasts remain on your device.",
         ).assertIsDisplayed()
+    }
+
+    @Test
+    fun noNavigationLabelWrapsOntoASecondLine() {
+        // The v1 bar rendered "Chances" as "Chance" / "s", which broke the alignment of every
+        // other tab. Every label is now one short word and must stay on one line.
+        listOf("Home", "Forecast", "Scenarios", "Charge").forEach { label ->
+            composeRule.onNodeWithText(label).assertIsDisplayed()
+        }
+        assertThat(composeRule.onAllNodes(hasText("Chances")).fetchSemanticsNodes()).isEmpty()
     }
 
     @Test
@@ -70,12 +80,12 @@ class DashboardComposeTest {
             composeRule.waitForIdle()
         }
 
-        composeRule.onNodeWithText("Will my phone last?").assertIsDisplayed()
+        composeRule.onNodeWithText("Will your phone last?").assertIsDisplayed()
     }
 
     @Test
     fun theAccuracyScreenNeverClaimsAHeadlineAccuracyPercentage() {
-        composeRule.onNodeWithText("More").performClick()
+        composeRule.onNodeWithContentDescription("Settings and privacy").performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Model accuracy").performClick()
         composeRule.waitForIdle()
@@ -87,9 +97,7 @@ class DashboardComposeTest {
 
     @Test
     fun theSettingsScreenExplainsEachOptionalPermission() {
-        composeRule.onNodeWithText("More").performClick()
-        composeRule.waitForIdle()
-        composeRule.onNodeWithText("Permissions and privacy").performClick()
+        composeRule.onNodeWithContentDescription("Settings and privacy").performClick()
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText("Usage access").assertIsDisplayed()

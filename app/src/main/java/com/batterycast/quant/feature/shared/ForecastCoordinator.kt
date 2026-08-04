@@ -29,11 +29,24 @@ import javax.inject.Singleton
 /** How the target time was chosen. */
 enum class TargetKind { BEDTIME, MIDNIGHT, TWO_HOURS, CALENDAR, CUSTOM }
 
+/**
+ * A chosen target, carrying two forms of its own name.
+ *
+ * v1 interpolated the chip label straight into a sentence and produced "until in 2 hours
+ * (5:21 p.m.)". A chip label and a sentence fragment are different things, so the type holds both.
+ */
 data class TargetSelection(
+    /** Chip form: "In 2 hours", "Bedtime", "Flight to Lisbon". */
     val label: String,
     val atMs: Long,
     val kind: TargetKind,
-)
+) {
+    /** Sentence form: always the clock time, which is what reads correctly after "until". */
+    fun sentenceForm(): String = com.batterycast.quant.core.ui.format.Formatters.clockTime(atMs)
+
+    /** True when the chip label already *is* a time, so repeating it would be redundant. */
+    val labelIsTime: Boolean get() = kind == TargetKind.CUSTOM && label.firstOrNull()?.isDigit() == true
+}
 
 sealed interface ForecastUiState {
     data object Loading : ForecastUiState

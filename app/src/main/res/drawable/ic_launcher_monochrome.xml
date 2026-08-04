@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Themed-icon variant: single colour, tinted by the launcher. -->
+<!-- Themed-icon variant: one colour, tinted by the launcher. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108"
     android:tint="#FFFFFF">
-
     <path
-        android:pathData="M32,49 L48,55 L64,63 L74,69"
+        android:pathData="M26,46 C40,50 56,58 68,68 C75,74 80,79 84,82"
         android:strokeColor="#FFFFFF"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:strokeWidth="4.5" />
-    <path
-        android:pathData="M28,36 L74,36 A6,6 0 0 1 80,42 L80,76 A6,6 0 0 1 74,82 L28,82 A6,6 0 0 1 22,76 L22,42 A6,6 0 0 1 28,36 Z"
-        android:strokeColor="#FFFFFF"
-        android:strokeLineJoin="round"
-        android:strokeWidth="4" />
+        android:strokeWidth="7" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M40,28 L62,28 A3,3 0 0 1 65,31 L65,34 L37,34 L37,31 A3,3 0 0 1 40,28 Z" />
+        android:pathData="M26,46 m-6.5,0 a6.5,6.5 0 1,0 13,0 a6.5,6.5 0 1,0 -13,0" />
+    <path
+        android:fillAlpha="0.6"
+        android:fillColor="#FFFFFF"
+        android:pathData="M24,88 L86,88 L86,91 L24,91 Z" />
 </vector>

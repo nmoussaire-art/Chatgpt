@@ -1,31 +1,21 @@
 package com.batterycast.quant.feature.whatchanged
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.automirrored.outlined.HelpOutline
-import androidx.compose.material.icons.automirrored.outlined.TrendingDown
-import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.batterycast.quant.core.ui.components.BatteryCastCard
-import com.batterycast.quant.core.ui.components.CollectingDataCard
+import com.batterycast.quant.core.ui.components.InfoCard
 import com.batterycast.quant.core.ui.components.SectionHeader
-import com.batterycast.quant.core.ui.components.StatRow
-import com.batterycast.quant.core.ui.components.StatusChip
+import com.batterycast.quant.core.ui.components.CompactRow
+import com.batterycast.quant.core.ui.components.InlineStatus
 import com.batterycast.quant.core.ui.format.Formatters
 import com.batterycast.quant.core.ui.theme.BatteryCastTheme
-import com.batterycast.quant.feature.dashboard.DashboardViewModel
+import com.batterycast.quant.core.ui.components.DetailScaffold
+import com.batterycast.quant.feature.home.HomeViewModel
 import com.batterycast.quant.feature.shared.ForecastUiState
 import com.batterycast.quant.forecasting.model.DriverDirection
 import com.batterycast.quant.forecasting.model.ForecastDriver
@@ -38,40 +28,36 @@ import com.batterycast.quant.forecasting.model.ForecastDriver
  * instead of making one.
  */
 @Composable
-fun WhatChangedScreen(viewModel: DashboardViewModel = hiltViewModel()) {
+fun WhatChangedScreen(
+    onBack: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+    DetailScaffold(
+        title = "What changed",
+        subtitle = "Every line here compares two measured quantities.",
+        onBack = onBack,
     ) {
-        item {
-            SectionHeader(
-                title = "What changed",
-                subtitle = "Everything here is a comparison against this phone's own history.",
-            )
-        }
-
         when (val current = state) {
             is ForecastUiState.Ready -> {
                 items(current.forecast.drivers) { driver -> DriverCard(driver) }
 
                 item {
-                    BatteryCastCard {
+                    InfoCard {
                         SectionHeader(title = "Measurement quality")
                         val quality = current.forecast.dataQuality
-                        StatRow("Usable readings", "${quality.usableObservationCount}")
-                        StatRow("Discarded as inconsistent", "${quality.rejectedCount}")
-                        StatRow(
+                        CompactRow("Usable readings", "${quality.usableObservationCount}")
+                        CompactRow("Discarded as inconsistent", "${quality.rejectedCount}")
+                        CompactRow(
                             "Observed history",
                             "${String.format("%.1f", quality.observedSpanHours)} hours",
                         )
-                        StatRow(
+                        CompactRow(
                             "Discharge observed",
                             "${quality.totalPercentObserved.toInt()} percentage points",
                         )
-                        StatRow(
+                        CompactRow(
                             "Newest reading",
                             Formatters.relativeAge(quality.newestObservationAgeMs),
                         )
@@ -88,7 +74,7 @@ fun WhatChangedScreen(viewModel: DashboardViewModel = hiltViewModel()) {
                 }
 
                 item {
-                    BatteryCastCard {
+                    InfoCard {
                         SectionHeader(title = "On app attribution")
                         Text(
                             text = "BatteryCast never claims that a specific app used a specific " +
@@ -103,15 +89,23 @@ fun WhatChangedScreen(viewModel: DashboardViewModel = hiltViewModel()) {
             }
 
             is ForecastUiState.Collecting -> item {
-                CollectingDataCard(
-                    headline = current.headline,
-                    detail = current.detail,
-                    progress = current.progress,
-                )
+                InfoCard {
+                    Text(
+                        text = current.headline,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
             }
 
             ForecastUiState.Loading -> item {
-                CollectingDataCard(headline = "Reading the battery…", detail = "Taking a live measurement.")
+                InfoCard {
+                    Text(
+                        text = "Reading your battery…",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
             }
         }
     }
@@ -120,15 +114,15 @@ fun WhatChangedScreen(viewModel: DashboardViewModel = hiltViewModel()) {
 @Composable
 private fun DriverCard(driver: ForecastDriver) {
     val semantic = BatteryCastTheme.semanticColors
-    val (color, icon) = when (driver.direction) {
-        DriverDirection.WORSE -> semantic.risk to Icons.AutoMirrored.Outlined.TrendingUp
-        DriverDirection.BETTER -> semantic.positive to Icons.AutoMirrored.Outlined.TrendingDown
-        DriverDirection.UNCERTAINTY -> semantic.caution to Icons.AutoMirrored.Outlined.HelpOutline
-        DriverDirection.NEUTRAL -> MaterialTheme.colorScheme.secondary to Icons.Outlined.CheckCircle
+    val color = when (driver.direction) {
+        DriverDirection.WORSE -> semantic.risk
+        DriverDirection.BETTER -> semantic.healthy
+        DriverDirection.UNCERTAINTY -> semantic.caution
+        DriverDirection.NEUTRAL -> semantic.learning
     }
 
-    BatteryCastCard {
-        StatusChip(
+    InfoCard {
+        InlineStatus(
             text = when (driver.direction) {
                 DriverDirection.WORSE -> "Shortens the forecast"
                 DriverDirection.BETTER -> "Extends the forecast"
@@ -136,7 +130,6 @@ private fun DriverCard(driver: ForecastDriver) {
                 DriverDirection.NEUTRAL -> "No change"
             },
             color = color,
-            icon = icon,
         )
         Text(
             text = driver.headline,
