@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -42,7 +41,9 @@ import com.batterycast.quant.core.ui.components.InlineStatus
 import com.batterycast.quant.core.ui.components.MetricLabel
 import com.batterycast.quant.core.ui.components.MiniRing
 import com.batterycast.quant.core.ui.components.QuietBlock
+import com.batterycast.quant.core.ui.components.ScreenGutter
 import com.batterycast.quant.core.ui.components.SectionHeader
+import com.batterycast.quant.core.ui.components.gutterItem
 import com.batterycast.quant.core.ui.format.Formatters
 import com.batterycast.quant.core.ui.theme.BatteryCastTheme
 import com.batterycast.quant.core.ui.theme.MetricStyle
@@ -80,17 +81,17 @@ fun ScenarioScreen(
     val baseline = scenarios.firstOrNull { it.scenario == Scenario.NORMAL }
     val chosen = scenarios.firstOrNull { it.scenario == selected }
 
+    // Zero horizontal content padding: the scenario chips run to the edges of the display, and
+    // every other item takes the gutter back through `gutterItem`.
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
-            start = 20.dp,
-            end = 20.dp,
             top = 8.dp,
             bottom = contentPadding.calculateBottomPadding() + 28.dp,
         ),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        item {
+        gutterItem {
             Column(modifier = Modifier.statusBarsPadding()) {
                 Text(
                     text = "Scenarios",
@@ -106,7 +107,7 @@ fun ScenarioScreen(
         }
 
         if (state !is ForecastUiState.Ready) {
-            item {
+            gutterItem {
                 HeroSurface {
                     Text(
                         text = "Not enough observed behaviour yet",
@@ -126,10 +127,8 @@ fun ScenarioScreen(
 
         item {
             LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = (-20).dp),
-                contentPadding = PaddingValues(horizontal = 20.dp),
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = ScreenGutter),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(
@@ -161,15 +160,15 @@ fun ScenarioScreen(
         }
 
         if (loading && scenarios.isEmpty()) {
-            item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
+            gutterItem { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
         }
 
         if (chosen != null) {
-            item { ComparisonCard(baseline = baseline, scenario = chosen) }
-            item { ProvenanceCard(chosen) }
+            gutterItem { ComparisonCard(baseline = baseline, scenario = chosen) }
+            gutterItem { ProvenanceCard(chosen) }
         }
 
-        item { GroupedProvisional(scenarios) }
+        gutterItem { GroupedProvisional(scenarios) }
     }
 }
 

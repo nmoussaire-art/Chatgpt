@@ -170,7 +170,7 @@ layout — and every title carries `maxLines` with ellipsis.
 | From the review | Status |
 |---|---|
 | "Chances" tab wrapping to two lines | Renamed and constrained; four one-word labels |
-| Target chips clipped at the card edge | Row bleeds past the inset and carries its own content padding |
+| Target chips clipped at the card edge | The list carries no horizontal inset; the chip row runs edge to edge with its own content padding, and every other item takes the gutter back through `gutterItem` |
 | "until in 2 hours (5:21 p.m.)" | `TargetSelection` now carries both a chip form and a sentence form |
 | "at 5:21 p.m.." double period | Removed |
 | "Ac" / "Usb" | `PlugType.displayName` |
@@ -178,6 +178,30 @@ layout — and every title carries `maxLines` with ellipsis.
 | Content clipped at the nav bar | Edge-to-edge; insets passed as content padding, translucent bar |
 | Zero-floor showing "0%" | "Could reach empty" |
 | `animatedReveal` hard-coded to 1f | Wired to a real animation |
+
+---
+
+## 2.0.1 — the launch crash
+
+The first v2 build crashed the instant it opened, before drawing a frame.
+
+The target-chip row was made to bleed past the screen's gutter with
+`Modifier.padding(horizontal = (-20).dp)` — cancelling the parent's inset by subtracting it back
+off. Compose does not allow that: `PaddingElement` validates its arguments with `require(...)`, so
+a negative padding compiles cleanly and then throws `IllegalArgumentException("Padding must be
+non-negative")` the first time it is composed. Home is the start destination, so the throw happened
+during the first composition and took the process with it. The same line existed on Scenarios.
+
+The bleed is now expressed the other way round, which is the direction Compose actually supports:
+the `LazyColumn` carries no horizontal `contentPadding` at all, the chip row runs the full width of
+the display with the gutter as its own `contentPadding`, and every other item opts the gutter back
+in through `gutterItem`. The rendered result is identical.
+
+`ComposeLayoutSafetyTest` now scans production sources for negative values passed to `padding`,
+`size`, `width`, `height` and `spacedBy`, and asserts that the two bleed screens keep their
+container padding horizontal-free. This class of defect is invisible to the compiler and unreachable
+from the JVM tests — those screens only compose with a live `ViewModel` — so it is caught
+statically instead.
 
 ---
 

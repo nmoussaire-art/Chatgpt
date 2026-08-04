@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -45,7 +44,9 @@ import com.batterycast.quant.core.ui.components.InlineStatus
 import com.batterycast.quant.core.ui.components.MetricLabel
 import com.batterycast.quant.core.ui.components.NavigationRow
 import com.batterycast.quant.core.ui.components.QuietBlock
+import com.batterycast.quant.core.ui.components.ScreenGutter
 import com.batterycast.quant.core.ui.components.SectionHeader
+import com.batterycast.quant.core.ui.components.gutterItem
 import com.batterycast.quant.core.ui.format.Formatters
 import com.batterycast.quant.core.ui.theme.BatteryCastTheme
 import com.batterycast.quant.core.ui.theme.MetricStyle
@@ -89,17 +90,17 @@ fun HomeScreen(
         viewModel.loadTargets()
     }
 
+    // The list carries no horizontal padding of its own: the target chips run to the edges of the
+    // display, and every other item takes the gutter back through `gutterItem`.
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
-            start = 20.dp,
-            end = 20.dp,
             top = 8.dp,
             bottom = contentPadding.calculateBottomPadding() + 28.dp,
         ),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        item { Greeting(onOpenSettings = onOpenSettings) }
+        gutterItem { Greeting(onOpenSettings = onOpenSettings) }
 
         item {
             TargetStrip(
@@ -112,22 +113,22 @@ fun HomeScreen(
         }
 
         when (val current = state) {
-            is ForecastUiState.Loading -> item { LoadingHero() }
+            is ForecastUiState.Loading -> gutterItem { LoadingHero() }
 
-            is ForecastUiState.Collecting -> item {
+            is ForecastUiState.Collecting -> gutterItem {
                 CollectingHero(headline = current.headline, progress = current.progress)
             }
 
             is ForecastUiState.Ready -> {
-                item {
+                gutterItem {
                     ForecastHero(
                         forecast = current.forecast,
                         target = current.target,
                         onOpenCharge = onOpenCharge,
                     )
                 }
-                item { WhatIsAffectingCard(current.forecast, onOpenWhatChanged) }
-                item {
+                gutterItem { WhatIsAffectingCard(current.forecast, onOpenWhatChanged) }
+                gutterItem {
                     NavigationRow(
                         title = "Try a different usage",
                         subtitle = "Navigation, video, gaming, power saving",
@@ -136,7 +137,7 @@ fun HomeScreen(
                         tint = BatteryCastTheme.semanticColors.forecast,
                     )
                 }
-                item { LearningStatus(current.forecast, onOpenForecast) }
+                gutterItem { LearningStatus(current.forecast, onOpenForecast) }
             }
         }
     }
@@ -355,13 +356,11 @@ private fun TargetStrip(
     onSelect: (TargetSelection) -> Unit,
     onSelectEvent: (CalendarTarget) -> Unit,
 ) {
-    // The row bleeds past the screen's own horizontal padding and carries its own, so a partially
-    // visible chip at the edge reads as "there is more" rather than as a clipping bug.
+    // The row runs the full width of the display and carries the gutter as its own content padding,
+    // so a partially visible chip at the edge reads as "there is more" rather than as a clipping bug.
     LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = (-20).dp),
-        contentPadding = PaddingValues(horizontal = 20.dp),
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = ScreenGutter),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(quickTargets, key = { "q-${it.label}" }) { option ->
