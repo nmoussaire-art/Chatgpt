@@ -1,7 +1,9 @@
 package com.batterycast.quant.feature.accuracy
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,11 +15,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import com.batterycast.quant.core.ui.components.DetailScaffold
-import com.batterycast.quant.core.ui.components.InfoCard
-import com.batterycast.quant.core.ui.components.ProbabilityMeter
+import com.batterycast.quant.core.ui.components.BatteryCastCard
+import com.batterycast.quant.core.ui.components.CollectingDataCard
+import com.batterycast.quant.core.ui.components.ProbabilityBar
 import com.batterycast.quant.core.ui.components.SectionHeader
-import com.batterycast.quant.core.ui.components.CompactRow
+import com.batterycast.quant.core.ui.components.StatRow
 import com.batterycast.quant.core.ui.format.Formatters
 import com.batterycast.quant.forecasting.accuracy.AccuracyEvaluator
 import com.batterycast.quant.forecasting.accuracy.AccuracyReport
@@ -59,44 +61,40 @@ class AccuracyViewModel @Inject constructor(
  * whether a stated 70 % chance happens about 70 % of the time.
  */
 @Composable
-fun AccuracyScreen(
-    onBack: () -> Unit,
-    viewModel: AccuracyViewModel = hiltViewModel(),
-) {
+fun AccuracyScreen(viewModel: AccuracyViewModel = hiltViewModel()) {
     val report by viewModel.report.collectAsStateWithLifecycle()
     val loaded by viewModel.loaded.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { viewModel.load() }
 
-    DetailScaffold(
-        title = "Model accuracy",
-        subtitle = "Scored against outcomes, from forecasts made beforehand.",
-        onBack = onBack,
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        item {
+            SectionHeader(
+                title = "Model accuracy",
+                subtitle = "Scored against real outcomes, from forecasts made before they happened.",
+            )
+        }
+
         val current = report
         if (current == null) {
             item {
-                InfoCard {
-                    Text(
-                        text = if (loaded) "No forecasts scored yet" else "Loading…",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = "Each forecast is filed when it is made and scored once its target " +
-                            "time passes and a real reading covers it. Figures appear after " +
-                            "${AccuracyReport.MIN_FORECASTS_FOR_REPORT} scored forecasts — sooner " +
-                            "would be describing noise.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                CollectingDataCard(
+                    headline = if (loaded) "No forecasts scored yet" else "Loading…",
+                    detail = "Each forecast is filed when it is made and scored once its target " +
+                        "time passes and a real reading covers it. Accuracy figures appear once " +
+                        "${AccuracyReport.MIN_FORECASTS_FOR_REPORT} forecasts have been scored — " +
+                        "reporting sooner would be describing noise.",
+                )
             }
-            return@DetailScaffold
+            return@LazyColumn
         }
 
         item {
-            InfoCard {
+            BatteryCastCard {
                 SectionHeader(title = "Typical error")
                 if (current.medianErrorByHorizon.isEmpty()) {
                     Text(
@@ -108,7 +106,7 @@ fun AccuracyScreen(
                 current.medianErrorByHorizon.entries
                     .sortedBy { it.key.ordinal }
                     .forEach { (bucket, error) ->
-                        CompactRow(
+                        StatRow(
                             label = bucket.label,
                             value = "${error.roundToInt()} pts",
                         )
@@ -124,18 +122,18 @@ fun AccuracyScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                CompactRow(label = "Forecasts scored", value = "${current.evaluatedForecasts}")
+                StatRow(label = "Forecasts scored", value = "${current.evaluatedForecasts}")
             }
         }
 
         item {
-            InfoCard {
+            BatteryCastCard {
                 SectionHeader(
                     title = "Bias",
                     subtitle = "Whether the forecast leans optimistic or pessimistic.",
                 )
                 val bias = current.bias
-                CompactRow(
+                StatRow(
                     label = "Median signed error",
                     value = Formatters.signedPercentPoints(bias),
                 )
@@ -155,7 +153,7 @@ fun AccuracyScreen(
         }
 
         item {
-            InfoCard {
+            BatteryCastCard {
                 SectionHeader(
                     title = "Interval coverage",
                     subtitle = "How often the real outcome fell inside each stated interval.",
@@ -164,7 +162,7 @@ fun AccuracyScreen(
                     .sortedBy { it.key.ordinal }
                     .forEach { (band, coverage) ->
                         val gap = coverage - band.nominalCoverage
-                        CompactRow(
+                        StatRow(
                             label = band.label,
                             supporting = "should be about ${(band.nominalCoverage * 100).roundToInt()}%",
                             value = Formatters.probability(coverage),
@@ -185,7 +183,7 @@ fun AccuracyScreen(
         }
 
         item {
-            InfoCard {
+            BatteryCastCard {
                 SectionHeader(
                     title = "Probability calibration",
                     subtitle = "When this app says 70%, does it happen about 70% of the time?",
@@ -198,14 +196,12 @@ fun AccuracyScreen(
                     )
                 }
                 current.calibrationBins.forEach { bin ->
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        CompactRow(
-                            label = "Said ${(bin.predictedMean * 100).roundToInt()}%",
-                            supporting = "${bin.count} forecasts",
-                            value = "happened ${Formatters.probability(bin.observedFrequency)}",
-                        )
-                        ProbabilityMeter(probability = bin.observedFrequency)
-                    }
+                    ProbabilityBar(
+                        probability = bin.observedFrequency,
+                        label = "Said ${(bin.predictedMean * 100).roundToInt()}% " +
+                            "(${bin.count} forecasts)",
+                        trailing = "happened ${Formatters.probability(bin.observedFrequency)}",
+                    )
                 }
             }
         }

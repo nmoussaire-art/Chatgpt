@@ -9,7 +9,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -88,37 +87,6 @@ class ObservationScheduler @Inject constructor(
             ExistingWorkPolicy.APPEND_OR_REPLACE,
             request,
         )
-    }
-
-    /**
-     * Schedules the charge reminder the user asked for on the planner screen.
-     *
-     * WorkManager rather than an exact alarm: a reminder that arrives within a few minutes of the
-     * recommended time is useful, and an exact-alarm permission would be a heavy ask for it.
-     * Replacing the previous request means there is only ever one pending reminder.
-     */
-    fun scheduleChargeReminder(atMs: Long, eventLabel: String, targetPercent: Int, durationMinutes: Int) {
-        val delayMs = (atMs - System.currentTimeMillis()).coerceAtLeast(0L)
-        val request = OneTimeWorkRequestBuilder<ChargeReminderWorker>()
-            .setInitialDelay(delayMs, TimeUnit.MILLISECONDS)
-            .setInputData(
-                workDataOf(
-                    ChargeReminderWorker.KEY_EVENT_LABEL to eventLabel,
-                    ChargeReminderWorker.KEY_TARGET_PERCENT to targetPercent,
-                    ChargeReminderWorker.KEY_DURATION_MINUTES to durationMinutes,
-                ),
-            )
-            .build()
-
-        workManager.enqueueUniqueWork(
-            ChargeReminderWorker.UNIQUE_NAME,
-            ExistingWorkPolicy.REPLACE,
-            request,
-        )
-    }
-
-    fun cancelChargeReminder() {
-        workManager.cancelUniqueWork(ChargeReminderWorker.UNIQUE_NAME)
     }
 
     fun cancelAll() {

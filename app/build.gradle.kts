@@ -36,8 +36,8 @@ android {
         applicationId = "com.batterycast.quant"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "2.0.1"
+        versionCode = 3
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "com.batterycast.quant.BatteryCastTestRunner"
 
@@ -110,6 +110,16 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+
+        // The Compose smoke tests launch a host activity that `ui-test-manifest` contributes, and
+        // that manifest is only merged into the debug variant. Running them against release would
+        // fail on a missing activity rather than on anything about the UI, and the UI code the two
+        // variants compile is identical — only minification differs, which no unit test exercises.
+        unitTests.all { test ->
+            if (test.name.contains("Release", ignoreCase = true)) {
+                test.exclude("**/ComponentSmokeTest*")
+            }
+        }
     }
 
     lint {
@@ -160,6 +170,13 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    // Compose under Robolectric, so the UI can be composed and measured on the JVM. Neither the
+    // compiler nor an ordinary unit test can see a modifier that throws only when it is composed.
+    // The host activity these tests launch comes from `ui-test-manifest`, which is merged into the
+    // debug manifest below — which is why the Compose smoke tests are debug-only.
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.truth)

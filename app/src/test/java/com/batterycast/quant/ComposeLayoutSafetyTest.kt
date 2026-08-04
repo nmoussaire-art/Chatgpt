@@ -9,14 +9,14 @@ import java.io.File
  *
  * Some Compose modifiers validate their arguments with `require(...)` rather than at the type
  * level, so an illegal constant compiles cleanly and then throws on the first frame that composes
- * it. That is not a cosmetic defect: on a start destination it is an immediate launch crash, and
- * because these screens are only reachable with a live `ViewModel`, neither the compiler nor the
- * JVM unit tests exercise them.
+ * it. On a start destination that is an immediate launch crash, and because these screens are only
+ * reachable with a live `ViewModel`, neither the compiler nor the JVM unit tests exercise them.
  *
- * v2 shipped exactly that — `Modifier.padding(horizontal = (-20).dp)` on the target-chip row, used
- * to make the row bleed past its parent's inset. `PaddingElement` rejects negative values, so the
- * home screen crashed before drawing anything. The bleed is now expressed the other way round: the
- * container carries no horizontal padding and each item opts in via `gutterItem`.
+ * The specific trap is negative padding, which is tempting whenever a row needs to bleed past its
+ * parent's inset: `Modifier.padding(horizontal = (-16).dp)` looks reasonable and throws
+ * `IllegalArgumentException("Padding must be non-negative")`. The supported way round is the
+ * opposite — the container carries no inset and each item opts in — which is what the screens with
+ * full-bleed chip rows do.
  *
  * These tests read the production sources rather than composing them, in the same spirit as
  * [ProductionPurityTest]: the property being asserted is structural.
@@ -29,26 +29,31 @@ class ComposeLayoutSafetyTest {
         .toList()
 
     @Test
+    fun `production sources are actually present`() {
+        assertThat(mainSources.size).isGreaterThan(30)
+    }
+
+    @Test
     fun `no padding modifier is given a negative value`() {
         // Matches `padding(-8.dp)`, `padding(horizontal = (-20).dp)` and the named-argument forms,
-        // which all throw IllegalArgumentException("Padding must be non-negative") when composed.
-        val negativePadding = Regex("""\bpadding\s*\([^)]*(\(\s*-|=\s*-|\(\s*-)\s*\d""")
+        // all of which throw IllegalArgumentException when composed.
+        val negativePadding = Regex("""\bpadding\s*\([^)]*(\(\s*-|=\s*-)\s*\d""")
 
-        val violations = scan { negativePadding.containsMatchIn(it) }
-
-        assertThat(violations).isEmpty()
+        assertThat(scan { negativePadding.containsMatchIn(it) }).isEmpty()
     }
 
     @Test
     fun `no size, width or height modifier is given a negative value`() {
         // `SizeElement` requires non-negative values for the same reason.
-        val negativeSize = Regex("""\b(size|width|height|requiredSize|requiredWidth|requiredHeight)\s*\([^)]*(\(\s*-|=\s*-)\s*\d""")
+        val negativeSize = Regex(
+            """\b(size|width|height|requiredSize|requiredWidth|requiredHeight)\s*\([^)]*(\(\s*-|=\s*-)\s*\d""",
+        )
 
         assertThat(scan { negativeSize.containsMatchIn(it) }).isEmpty()
     }
 
     @Test
-    fun `spacedBy is never given a negative spacing inside a scrolling row`() {
+    fun `spacedBy is never given a negative spacing`() {
         // `Arrangement.spacedBy` accepts negatives, but a negative gap in a LazyRow makes item
         // positions non-monotonic and the list throws while measuring.
         val negativeSpacing = Regex("""spacedBy\s*\(\s*\(?\s*-\s*\d""")
@@ -57,34 +62,13 @@ class ComposeLayoutSafetyTest {
     }
 
     @Test
-    fun `the screen gutter is applied per item rather than as container padding`() {
-        // The two screens that carry a full-bleed chip row must not reintroduce horizontal
-        // contentPadding on their LazyColumn, or the chips clip at the card edge again.
-        val bleedScreens = listOf(
-            "feature/home/HomeScreen.kt",
-            "feature/scenarios/ScenarioScreen.kt",
-        )
+    fun `weight is never given a value of zero or less`() {
+        // `Modifier.weight` requires a strictly positive value, and the fractional bars in the UI
+        // compute their weights from live data — so the clamps that keep those weights positive are
+        // load-bearing, not defensive.
+        val nonPositiveWeight = Regex("""\bweight\s*\(\s*(0f|0\.0f|0)\s*[,)]""")
 
-        bleedScreens.forEach { path ->
-            val source = File(projectDir, "src/main/java/com/batterycast/quant/$path")
-            assertThat(source.exists()).isTrue()
-
-            val text = source.readText()
-            assertThat(text).contains("gutterItem")
-            // The LazyColumn's contentPadding block must not set a horizontal inset.
-            val contentPadding = Regex(
-                """contentPadding\s*=\s*PaddingValues\(([^)]*)\)""",
-                RegexOption.DOT_MATCHES_ALL,
-            ).findAll(text).map { it.groupValues[1] }.toList()
-
-            val columnPadding = contentPadding.filter { it.contains("calculateBottomPadding") }
-            assertThat(columnPadding).isNotEmpty()
-            columnPadding.forEach { arguments ->
-                assertThat(arguments).doesNotContain("start =")
-                assertThat(arguments).doesNotContain("end =")
-                assertThat(arguments).doesNotContain("horizontal =")
-            }
-        }
+        assertThat(scan { nonPositiveWeight.containsMatchIn(it) }).isEmpty()
     }
 
     private fun scan(predicate: (String) -> Boolean): List<String> = mainSources.flatMap { file ->

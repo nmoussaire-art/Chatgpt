@@ -140,14 +140,7 @@ enum class QualityNote {
 
 enum class ChargingStatus { CHARGING, DISCHARGING, FULL, NOT_CHARGING, UNKNOWN }
 
-enum class PlugType(val displayName: String) {
-    NONE("Not plugged in"),
-    AC("AC"),
-    USB("USB"),
-    WIRELESS("Wireless"),
-    DOCK("Dock"),
-    UNKNOWN("Unknown"),
-}
+enum class PlugType { NONE, AC, USB, WIRELESS, DOCK, UNKNOWN }
 
 enum class BatteryHealth { GOOD, OVERHEAT, DEAD, OVER_VOLTAGE, COLD, UNSPECIFIED_FAILURE, UNKNOWN }
 

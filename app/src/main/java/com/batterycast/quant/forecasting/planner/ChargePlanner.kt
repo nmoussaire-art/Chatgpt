@@ -196,7 +196,7 @@ class ChargePlanner @Inject constructor(
             notes = buildList {
                 add(
                     "Based on this phone's observed charging speed on a " +
-                        "${request.plugType.displayName} charger.",
+                        "${request.plugType.name.lowercase()} charger.",
                 )
                 if (chargeDistribution.support == SupportLevel.SPARSE) {
                     add("Only a little charging has been observed so far, so treat the timing as approximate.")

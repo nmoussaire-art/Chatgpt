@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The mark is the forecast, not the battery.
-
-  v1 drew a battery outline with a small curve inside it; at 48dp on a launcher the outline
-  dominated and the curve — the distinctive part — disappeared. Here the median line and its
-  uncertainty band *are* the logo, with a single mint dot marking "now". A battery cell is implied
-  by the rounded terminal at the top rather than drawn as a container.
+  The mark: a battery whose fill is a forecast — a descending median line inside a widening
+  uncertainty band. It says "prediction", not "battery gauge", which is the whole point of the app.
+  Drawn inside the 66dp adaptive-icon safe zone.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -13,28 +10,29 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Uncertainty band, widening to the right exactly as a forecast interval does. -->
+    <!-- Uncertainty band, widening to the right as a forecast interval does. -->
     <path
-        android:fillAlpha="0.30"
-        android:fillColor="#5DE4B0"
-        android:pathData="M26,42 L48,50 L68,63 L84,76 L84,86 L68,74 L48,60 L26,50 Z" />
+        android:fillAlpha="0.32"
+        android:fillColor="#00E699"
+        android:pathData="M32,45 L48,50 L64,58 L74,66 L74,72 L64,68 L48,60 L32,53 Z" />
 
-    <!-- Median projection: the app's signature stroke. -->
+    <!-- Median projection. -->
     <path
-        android:pathData="M26,46 C40,50 56,58 68,68 C75,74 80,79 84,82"
-        android:strokeColor="#7BF0C4"
+        android:pathData="M32,49 L48,55 L64,63 L74,69"
+        android:strokeColor="#00E699"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:strokeWidth="7" />
+        android:strokeWidth="4.5" />
 
-    <!-- "Now" — where the forecast starts. -->
+    <!-- Battery body. -->
     <path
-        android:fillColor="#F6F8FC"
-        android:pathData="M26,46 m-6.5,0 a6.5,6.5 0 1,0 13,0 a6.5,6.5 0 1,0 -13,0" />
+        android:pathData="M28,36 L74,36 A6,6 0 0 1 80,42 L80,76 A6,6 0 0 1 74,82 L28,82 A6,6 0 0 1 22,76 L22,42 A6,6 0 0 1 28,36 Z"
+        android:strokeColor="#E8EEF7"
+        android:strokeLineJoin="round"
+        android:strokeWidth="4" />
 
-    <!-- Reserve threshold, the level the forecast is measured against. -->
+    <!-- Terminal. -->
     <path
-        android:fillAlpha="0.55"
-        android:fillColor="#78A9FF"
-        android:pathData="M24,88 L86,88 L86,91 L24,91 Z" />
+        android:fillColor="#E8EEF7"
+        android:pathData="M40,28 L62,28 A3,3 0 0 1 65,31 L65,34 L37,34 L37,31 A3,3 0 0 1 40,28 Z" />
 </vector>
