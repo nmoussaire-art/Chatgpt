@@ -1,17 +1,19 @@
-# ADCB Tracker – merchant parsing fix (2026-10-01)
+# ADCB Tracker
 
-ADCB changed its SMS wording from `... at MERCHANT, CITY-AE. Avl.Cr.limit is AED...`
-to `... at MERCHANT, CITY-AE. Available limit AED...`. The merchant regex only accepted
-`Avl.` after the merchant, so every new alert was saved as "Unknown Merchant".
+Source code lives in `android/` (Kotlin + Jetpack Compose). Build with
+`cd android && ./gradlew assembleRelease` (needs a `keystore.properties` with the signing key).
 
-Patched regexes in `com.adcbtracker.parser.AdcbAlertParser`:
+## v2.4.0 (2026-10-01)
+- **Billing cycle**: Home and Insights follow the card statement period instead of calendar
+  months. Default start day is the 24th; change it in Settings › Billing cycle (1 = calendar months).
+- **Interactive spending calendar** (Insights): tap any day to open a sheet with that day's total,
+  category split and every transaction; arrows step to the previous/next day.
+- **Daily spending**: Home shows Today / Yesterday / This week tiles and a list of the last 14 days
+  (tap a day for details). Transactions are grouped by day with each day's total.
+- Daily pace chart is touch-interactive; cycle history bars jump to that cycle.
+- Merchant parsing fix from v2.3.3-fix (ADCB's "Available limit" wording) carried over.
 
-| Field | Old | New |
-|---|---|---|
-| MERCHANT_AT_RE | `(?i)\bat\s+([^.]+?)\.\s*(?:Avl\.\|$)` | `(?i)\bat\s+(.+?)\.(?:\s\|$)` |
-| MERCHANT_BY_RE | `(?i)\bby\s+([^.]+?)\.\s*(?:Avl\.\|$)` | `(?i)\bby\s+(.+?)\.(?:\s\|$)` |
-| AVL_CR_LIMIT_RE | `(?i)\bAvl\.?\s*Cr\.?\s*limit...` | `(?i)\b(?:Avl\.?\s*Cr\.?\|Available(?:\s+Cr\.?\|\s+credit)?)\s*limit...` |
-
-Both the old and new SMS formats parse correctly; merchants containing dots (e.g. `AMAZON.AE`) now work too.
-The APK is signed with a new key (the original debug key was not available), so the old app must be
-uninstalled before installing this one; then run Settings → Import from SMS.
+## v2.3.3-fix
+ADCB changed its SMS wording from `... CITY-AE. Avl.Cr.limit is AED...` to
+`... CITY-AE. Available limit AED...`; the merchant regex required `Avl.` and so every new
+alert was saved as "Unknown Merchant". Fixed by ending the merchant at the first ". ".

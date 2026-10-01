@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ADCB Tracker</string>
+    <string name="notification_listener_label">ADCB Transaction Tracker</string>
+</resources>

@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.ADCBTracker" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/ink0</item>
+        <item name="android:statusBarColor">@color/ink0</item>
+        <item name="android:navigationBarColor">@color/ink0</item>
+    </style>
+</resources>
