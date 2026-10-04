@@ -5,6 +5,9 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
@@ -113,9 +116,16 @@ class ScreenshotTest {
         compose.waitUntil(5000) { compose.onAllNodesWithText("Daily spending").fetchSemanticsNodes().isNotEmpty() }
         compose.onAllNodesWithText("Insights").onFirst().performClick()
         compose.waitUntil(5000) { compose.onAllNodesWithText("Spending calendar").fetchSemanticsNodes().isNotEmpty() }
+        compose.onAllNodesWithText("PROJECTED AT STATEMENT").onFirst().performClick()
         shot("3_insights")
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Daily pace"))
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("By day of week"))
+        val hint = compose.onNodeWithText("Touch or drag", substring = true).fetchSemanticsNode().boundsInRoot
+        // Day ~11 of the cycle: a third of the way across the chart, below the hint.
+        compose.onRoot().performTouchInput {
+            click(androidx.compose.ui.geometry.Offset(hint.left + (hint.width) * 0.34f, hint.bottom + 300f))
+        }
+        compose.onNode(androidx.compose.ui.test.hasText("Touch or drag", substring = true)).assertDoesNotExist()
         shot("3b_insights_charts")
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Cycle history"))
         shot("3c_insights_history")

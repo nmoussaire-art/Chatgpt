@@ -142,6 +142,10 @@ data class Projection(
     val daysLeft: Int,
     val oneOffThresholdMinor: Long,
     val basedOnCycles: Int,
+    /** Average big-purchase total per past cycle. */
+    val typicalOneOffsPerCycleMinor: Long = 0,
+    /** Big purchases still expected this cycle, based on [typicalOneOffsPerCycleMinor]. */
+    val expectedMoreOneOffsMinor: Long = 0,
 )
 
 object Projections {
@@ -163,23 +167,38 @@ object Projections {
         val currentRate = regular(inCycle).toDouble() / elapsed
 
         // Only use past cycles that actually have data (the app may be newer than a year).
-        val pastRates = pastCycles.mapNotNull { c ->
+        val pastLists = pastCycles.mapNotNull { c ->
             val list = txs.filter { c.contains(it.tx.tsEpochMillis.toUaeDate()) }
-            if (list.isEmpty()) null else regular(list).toDouble() / c.lengthDays
+            if (list.isEmpty()) null else c to list
         }
+        val pastRates = pastLists.map { (c, list) -> regular(list).toDouble() / c.lengthDays }
+
+        // Big purchases happen too, just not daily: expect the typical amount for the rest of the
+        // cycle, minus what has already been spent on big purchases this cycle.
+        val typicalOneOffs = if (pastLists.isEmpty()) 0.0 else pastLists.map { (_, list) ->
+            list.filter { it.tx.amountMinor >= oneOffThresholdMinor }.sumOf { it.tx.amountMinor }
+        }.average()
+        val oneOffsSoFar = oneOffs.sumOf { it.tx.amountMinor }
+        val expectedMoreOneOffs = minOf(
+            typicalOneOffs * daysLeft / current.lengthDays,
+            (typicalOneOffs - oneOffsSoFar).coerceAtLeast(0.0),
+        ).toLong()
+
         val rate = if (pastRates.isEmpty()) currentRate else {
             val w = elapsed.toDouble() / current.lengthDays
             w * currentRate + (1 - w) * pastRates.average()
         }
         return Projection(
-            totalMinor = spent + (rate * daysLeft).toLong(),
+            totalMinor = spent + (rate * daysLeft).toLong() + expectedMoreOneOffs,
             spentSoFarMinor = spent,
-            oneOffsMinor = oneOffs.sumOf { it.tx.amountMinor },
+            oneOffsMinor = oneOffsSoFar,
             oneOffCount = oneOffs.size,
             usualDailyMinor = rate.toLong(),
             daysLeft = daysLeft,
             oneOffThresholdMinor = oneOffThresholdMinor,
             basedOnCycles = pastRates.size,
+            typicalOneOffsPerCycleMinor = typicalOneOffs.toLong(),
+            expectedMoreOneOffsMinor = expectedMoreOneOffs,
         )
     }
 }

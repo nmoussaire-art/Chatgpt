@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -75,28 +76,18 @@ fun DailyPaceChart(
         }
         Spacer(Modifier.height(12.dp))
 
+        // Fixed-height readout: label above, amount below, each in its own half so large
+        // font sizes shrink nothing and hide nothing.
         val sel = selected
-        Column(Modifier.fillMaxWidth().height(46.dp)) {
+        Column(Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
             if (sel != null) {
                 val date = cycle.start.plusDays(sel.toLong())
                 val cur = if (sel < visibleDays) current.getOrNull(sel) else null
                 Text("Day ${sel + 1} · ${date.format(fmt)}", style = MaterialTheme.typography.labelMedium, color = TextMid)
-                Row {
-                    Text(
-                        "This: ${cur?.let { formatMoney(it) } ?: "—"}",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Emerald,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                    )
-                    Text(
-                        "Previous: ${previous.getOrNull(sel)?.let { formatMoney(it) } ?: "—"}",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = TextHigh,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.End,
-                        maxLines = 1,
-                    )
+                Spacer(Modifier.height(2.dp))
+                Row(Modifier.fillMaxWidth()) {
+                    ReadoutValue("This cycle", cur?.let { formatMoney(it) } ?: "—", Emerald, Alignment.Start, Modifier.weight(1f))
+                    ReadoutValue("Previous", previous.getOrNull(sel)?.let { formatMoney(it) } ?: "—", TextHigh, Alignment.End, Modifier.weight(1f))
                 }
             } else {
                 Text("Touch or drag on the chart to compare a day", style = MaterialTheme.typography.labelMedium, color = TextMid)
@@ -273,5 +264,21 @@ fun CategoryBreakdown(rows: List<CategoryTotal>, total: Long, onClick: (com.adcb
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ReadoutValue(label: String, value: String, color: androidx.compose.ui.graphics.Color, align: Alignment.Horizontal, modifier: Modifier) {
+    Column(modifier, horizontalAlignment = align) {
+        Text(label, style = MaterialTheme.typography.labelSmall, color = TextMid, maxLines = 1)
+        Text(
+            value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = color,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }

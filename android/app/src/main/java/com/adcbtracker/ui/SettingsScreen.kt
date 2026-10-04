@@ -66,7 +66,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-const val APP_VERSION = "2.5.0"
+const val APP_VERSION = "2.5.1"
 
 @Composable
 fun SettingsScreen(vm: MainViewModel) {

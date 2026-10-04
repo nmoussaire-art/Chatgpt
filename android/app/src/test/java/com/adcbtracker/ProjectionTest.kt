@@ -49,4 +49,23 @@ class ProjectionTest {
         assertEquals(18_500L, p.usualDailyMinor)
         assertEquals(1, p.basedOnCycles)
     }
+
+    @Test
+    fun expectsTypicalBigPurchasesThatHaveNotHappenedYet() {
+        val today = LocalDate.of(2026, 10, 9) // day 16 of 30, 14 days left
+        val cycle = Cycles.cycleFor(today, 24)
+        val past = Cycles.cycleAgo(today, 24, 1)
+        // Last cycle: 100/day plus a 3,000 big payment. This cycle: 100/day, no big payment yet.
+        val pastTxs = (0 until past.lengthDays).map { tx(past.start.plusDays(it.toLong()), 100) } + tx(past.start, 3000)
+        val curTxs = (0 until 16).map { tx(cycle.start.plusDays(it.toLong()), 100) }
+        val p = Projections.project(cycle, pastTxs + curTxs, today, listOf(past), 100_000)
+        assertEquals(300_000L, p.typicalOneOffsPerCycleMinor)
+        // min(3000 × 14/30, 3000 − 0) = 1400
+        assertEquals(140_000L, p.expectedMoreOneOffsMinor)
+        assertEquals((1600 + 100 * 14 + 1400) * 100L, p.totalMinor)
+
+        // Once this cycle already had its big payment, no more are expected.
+        val p2 = Projections.project(cycle, pastTxs + curTxs + tx(cycle.start, 3500), today, listOf(past), 100_000)
+        assertEquals(0L, p2.expectedMoreOneOffsMinor)
+    }
 }

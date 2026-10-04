@@ -3,6 +3,12 @@
 Source code lives in `android/` (Kotlin + Jetpack Compose). Build with
 `cd android && ./gradlew assembleRelease` (needs a `keystore.properties` with the signing key).
 
+## v2.5.1 (2026-10-04)
+- Fix: Daily pace readout lost its amounts at large font sizes; values now sit on their own line.
+- Projection explanation folded behind an ⓘ (tap the title or amount to show it).
+- Projection now also expects your typical big purchases (from the last 3 cycles) that haven't
+  happened yet this cycle, so recurring large bills aren't left out.
+
 ## v2.5.0 (2026-10-04)
 - New adaptive app icon (glass card + glowing trend line, themed-icon support).
 - Tap any transaction anywhere (day sheet, Home, Insights, Expenses) to open an edit sheet:

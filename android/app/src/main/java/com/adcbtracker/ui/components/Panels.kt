@@ -1,6 +1,22 @@
 package com.adcbtracker.ui.components
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import com.adcbtracker.ui.theme.Ink2
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,24 +35,67 @@ import com.adcbtracker.ui.theme.Coral
 import com.adcbtracker.ui.theme.Emerald
 import com.adcbtracker.ui.theme.TextMid
 
-/** Statement projection with a one-line explanation of how it was worked out. */
+/** Statement projection; tapping the ⓘ reveals how the number was worked out. */
 @Composable
 fun ProjectionPanel(p: Projection) {
-    Column(Modifier.fillMaxWidth()) {
-        Text("PROJECTED AT STATEMENT", style = MaterialTheme.typography.labelSmall, color = TextMid)
-        Text("≈ ${formatMoney(p.totalMinor)}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(4.dp))
-        val parts = buildString {
-            append("${formatMoney(p.spentSoFarMinor)} spent")
-            if (p.daysLeft > 0) append(" + usual ${formatMoney(p.usualDailyMinor)}/day × ${p.daysLeft} day${if (p.daysLeft == 1) "" else "s"} left")
-            append(".")
-            if (p.oneOffCount > 0) {
-                append(" ${p.oneOffCount} one-off${if (p.oneOffCount == 1) "" else "s"} ≥ ${formatMoney(p.oneOffThresholdMinor)} ")
-                append("(${formatMoney(p.oneOffsMinor)}) not treated as daily spending.")
-            }
-            if (p.basedOnCycles > 0) append(" Pace blended with your last ${p.basedOnCycles} cycle${if (p.basedOnCycles == 1) "" else "s"}.")
+    var showHow by rememberSaveable { mutableStateOf(false) }
+    Column(Modifier.fillMaxWidth().animateContentSize()) {
+        Row(
+            Modifier.clip(RoundedCornerShape(8.dp)).clickable { showHow = !showHow },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("PROJECTED AT STATEMENT", style = MaterialTheme.typography.labelSmall, color = TextMid)
+            Spacer(Modifier.width(6.dp))
+            Icon(
+                Icons.Outlined.Info,
+                contentDescription = "How is this calculated?",
+                tint = if (showHow) Emerald else TextMid,
+                modifier = Modifier.size(16.dp),
+            )
         }
-        Text(parts, style = MaterialTheme.typography.bodySmall, color = TextMid)
+        Text(
+            "≈ ${formatMoney(p.totalMinor)}",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.clickable { showHow = !showHow },
+        )
+        if (showHow) {
+            Spacer(Modifier.height(8.dp))
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Ink2)
+                    .padding(12.dp)
+            ) {
+                HowRow("Spent so far", formatMoney(p.spentSoFarMinor))
+                if (p.daysLeft > 0) {
+                    HowRow("Usual spending", "${formatMoney(p.usualDailyMinor)}/day × ${p.daysLeft}d")
+                }
+                if (p.expectedMoreOneOffsMinor > 0) HowRow("Big purchases still expected", formatMoney(p.expectedMoreOneOffsMinor))
+                Spacer(Modifier.height(6.dp))
+                val notes = buildList {
+                    add("Purchases ≥ ${formatMoney(p.oneOffThresholdMinor)} count as big purchases and aren't spread across every day.")
+                    if (p.oneOffCount > 0) add("This cycle: ${p.oneOffCount} big purchase${if (p.oneOffCount == 1) "" else "s"} (${formatMoney(p.oneOffsMinor)}).")
+                    if (p.basedOnCycles > 0) {
+                        val cycles = "your last ${p.basedOnCycles} cycle${if (p.basedOnCycles == 1) "" else "s"}"
+                        add(
+                            if (p.typicalOneOffsPerCycleMinor > 0) "Usual pace is blended with $cycles, which typically had ${formatMoney(p.typicalOneOffsPerCycleMinor)} of big purchases."
+                            else "Usual pace is blended with $cycles."
+                        )
+                    }
+                }
+                notes.forEach { Text(it, style = MaterialTheme.typography.bodySmall, color = TextMid) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HowRow(label: String, value: String) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+        Text(label, style = MaterialTheme.typography.bodySmall, color = TextMid, modifier = Modifier.weight(1f))
+        Text(value, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
     }
 }
 
