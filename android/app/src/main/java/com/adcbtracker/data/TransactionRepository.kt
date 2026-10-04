@@ -33,6 +33,11 @@ class TransactionRepository(private val db: AppDb) {
 
     fun totalCount(): Flow<Int> = transactionDao.totalCount()
 
+    fun byId(id: Long): Flow<TransactionWithCategory?> =
+        combine(transactionDao.byId(id), categories) { tx, cats ->
+            tx?.let { TransactionWithCategory(it, it.categoryId?.let { c -> cats.firstOrNull { cat -> cat.id == c } }) }
+        }
+
     fun merchantsWithCategories(): Flow<List<MerchantWithCategory>> = transactionDao.merchantsWithCategories()
 
     /** Returns true if the transaction was new. */

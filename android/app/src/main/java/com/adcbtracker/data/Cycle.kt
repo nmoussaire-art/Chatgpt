@@ -26,14 +26,14 @@ data class Cycle(val start: LocalDate, val endExclusive: LocalDate) {
     /** 0-based index of [date] within this cycle. */
     fun dayIndex(date: LocalDate): Int = ChronoUnit.DAYS.between(start, date).toInt()
 
-    fun label(): String {
+    fun label(includeYear: Boolean = true): String {
         if (start.dayOfMonth == 1 && lastDay.month == start.month) {
             return start.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.US))
         }
         val dm = DateTimeFormatter.ofPattern("d MMM", Locale.US)
         val dmy = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.US)
         val left = if (start.year == lastDay.year) start.format(dm) else start.format(dmy)
-        return "$left – ${lastDay.format(dmy)}"
+        return "$left – ${lastDay.format(if (includeYear) dmy else dm)}"
     }
 
     fun shortLabel(): String =

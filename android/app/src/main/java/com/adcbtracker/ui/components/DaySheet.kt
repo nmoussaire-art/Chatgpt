@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.adcbtracker.data.DaySummary
+import com.adcbtracker.data.TransactionWithCategory
 import com.adcbtracker.data.spendMinor
 import com.adcbtracker.ui.theme.Emerald
 import com.adcbtracker.ui.theme.Ink1
@@ -58,6 +59,7 @@ fun DayDetailSheet(
     largeThresholdMinor: Long,
     onDismiss: () -> Unit,
     onChangeDay: (LocalDate) -> Unit,
+    onTransactionClick: (TransactionWithCategory) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -138,7 +140,7 @@ fun DayDetailSheet(
             } else {
                 LazyColumn(Modifier.fillMaxWidth().heightIn(max = 460.dp)) {
                     items(txs, key = { it.tx.id }) { item ->
-                        TransactionRow(item, largeThresholdMinor)
+                        TransactionRow(item, largeThresholdMinor) { onTransactionClick(item) }
                         HorizontalDivider(color = Ink2)
                     }
                 }

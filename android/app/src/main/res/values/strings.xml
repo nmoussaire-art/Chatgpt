@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ADCB Tracker</string>
     <string name="notification_listener_label">ADCB Transaction Tracker</string>
+    <string name="widget_description">Today\'s spending and your billing cycle at a glance</string>
 </resources>

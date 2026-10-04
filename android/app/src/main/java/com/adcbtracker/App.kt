@@ -19,6 +19,9 @@ class App : Application() {
         super.onCreate()
         db = AppDb.get(this)
         repo = TransactionRepository(db)
-        applicationScope.launch { repo.populateDefaultCategoriesIfNeeded() }
+        applicationScope.launch {
+            repo.populateDefaultCategoriesIfNeeded()
+            runCatching { com.adcbtracker.service.SpendWidget.refresh(this@App) }
+        }
     }
 }

@@ -25,11 +25,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.adcbtracker.data.DaySummary
 import com.adcbtracker.data.Prefs
 import com.adcbtracker.data.toUaeDate
 import com.adcbtracker.ui.components.AppCard
+import com.adcbtracker.ui.components.BudgetPanel
+import com.adcbtracker.ui.components.ProjectionPanel
 import com.adcbtracker.ui.components.CategoryBadge
 import com.adcbtracker.ui.components.EmptyState
 import com.adcbtracker.ui.components.Pill
@@ -94,11 +97,48 @@ fun HomeScreen(vm: MainViewModel) {
 
         item { CycleHeroCard(state) }
 
+        if (state.uncategorizedCount > 0 && state.cycle != null) {
+            item {
+                AppCard(onClick = { vm.openCategory(null, state.cycle!!.cycle) }) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("🏷️", fontSize = 26.sp)
+                        Spacer(Modifier.width(14.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                "${state.uncategorizedCount} transaction${if (state.uncategorizedCount == 1) "" else "s"} need a category",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                            Text("Tap to sort them out — it takes a few seconds", style = MaterialTheme.typography.bodySmall, color = TextMid)
+                        }
+                        Text("›", style = MaterialTheme.typography.headlineMedium, color = Emerald)
+                    }
+                }
+            }
+        }
+
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 StatTile("Today", state.todayTotal, state.todayCount, Modifier.weight(1f)) { vm.openDay(today) }
                 StatTile("Yesterday", state.yesterdayTotal, state.yesterdayCount, Modifier.weight(1f)) { vm.openDay(today.minusDays(1)) }
                 StatTile("This week", state.weekTotal, state.weekCount, Modifier.weight(1f), null)
+            }
+        }
+
+        state.availableLimitMinor?.let { limit ->
+            item {
+                AppCard {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("AVAILABLE CREDIT", style = MaterialTheme.typography.labelSmall, color = TextMid)
+                            Text(formatMoney(limit), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        }
+                        Text(
+                            "as of ${timeAgo(state.availableLimitAt)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextMid,
+                        )
+                    }
+                }
             }
         }
 
@@ -113,11 +153,14 @@ fun HomeScreen(vm: MainViewModel) {
         state.cycle?.takeIf { it.categories.isNotEmpty() }?.let { cycle ->
             item {
                 AppCard {
-                    SectionTitle("By category", "This billing cycle")
+                    SectionTitle("By category", "This billing cycle · tap to see transactions")
                     Spacer(Modifier.height(14.dp))
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         cycle.categories.take(5).forEach { c ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(
+                                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { vm.openCategory(c.category?.id, cycle.cycle) },
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
                                 CategoryBadge(c.category, size = 34)
                                 Spacer(Modifier.width(12.dp))
                                 Column(Modifier.weight(1f)) {
@@ -141,7 +184,7 @@ fun HomeScreen(vm: MainViewModel) {
                     SectionTitle("Recent")
                     Spacer(Modifier.height(4.dp))
                     state.recent.forEachIndexed { i, t ->
-                        TransactionRow(t, threshold, showDate = true) { vm.openDay(t.tx.tsEpochMillis.toUaeDate()) }
+                        TransactionRow(t, threshold, showDate = true) { vm.openTransaction(t.tx.id) }
                         if (i < state.recent.lastIndex) HorizontalDivider(color = Ink2)
                     }
                 }
@@ -183,6 +226,16 @@ private fun CycleHeroCard(state: HomeState) {
                 style = MaterialTheme.typography.labelSmall,
                 color = TextMid,
             )
+        }
+        state.projection?.takeIf { cycle.totalMinor > 0 }?.let { p ->
+            Spacer(Modifier.height(14.dp))
+            HorizontalDivider(color = Ink2)
+            Spacer(Modifier.height(12.dp))
+            ProjectionPanel(p)
+        }
+        if (state.budgetMinor > 0) {
+            Spacer(Modifier.height(14.dp))
+            BudgetPanel(state.budgetMinor, cycle.totalMinor, cycle.cycle.lengthDays - dayNo + 1, state.projection?.totalMinor)
         }
     }
 }
@@ -239,5 +292,15 @@ fun DailyList(days: List<DaySummary>, today: java.time.LocalDate, onClick: (DayS
             }
             if (i < days.lastIndex) HorizontalDivider(color = Ink2)
         }
+    }
+}
+
+private fun timeAgo(epochMillis: Long): String {
+    val mins = (System.currentTimeMillis() - epochMillis) / 60_000
+    return when {
+        mins < 1 -> "just now"
+        mins < 60 -> "${mins}m ago"
+        mins < 60 * 24 -> "${mins / 60}h ago"
+        else -> "${mins / (60 * 24)}d ago"
     }
 }

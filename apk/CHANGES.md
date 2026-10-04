@@ -3,6 +3,20 @@
 Source code lives in `android/` (Kotlin + Jetpack Compose). Build with
 `cd android && ./gradlew assembleRelease` (needs a `keystore.properties` with the signing key).
 
+## v2.5.0 (2026-10-04)
+- New adaptive app icon (glass card + glowing trend line, themed-icon support).
+- Tap any transaction anywhere (day sheet, Home, Insights, Expenses) to open an edit sheet:
+  pick a category for just that transaction or for every transaction from the merchant, or delete it.
+- Tap a category (Home/Insights) to list its transactions for the cycle; Home shows a
+  "N transactions need a category" shortcut. Merchants tab has search and a chip picker.
+- Statement projection: spent so far + usual daily spend × days left, where one-off purchases
+  at or above the large-expense threshold are not extrapolated and the pace is blended with the
+  last 3 cycles. The card explains the numbers.
+- Cycle budget with "safe to spend per day"; available credit on Home.
+- Large-expense phone notifications (toggle in Settings) and a home-screen widget.
+- Fixed truncated "Previous" readout on the Daily pace chart, overlapping nav labels and the
+  cramped projection row. "Transactions" tab renamed "Expenses".
+
 ## v2.4.0 (2026-10-01)
 - **Billing cycle**: Home and Insights follow the card statement period instead of calendar
   months. Default start day is the 24th; change it in Settings › Billing cycle (1 = calendar months).

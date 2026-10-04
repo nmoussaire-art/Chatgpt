@@ -30,6 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.adcbtracker.data.Stats
 import com.adcbtracker.data.toUaeDate
 import com.adcbtracker.ui.components.AppCard
+import com.adcbtracker.ui.components.BudgetPanel
+import com.adcbtracker.ui.components.ProjectionPanel
 import com.adcbtracker.ui.components.CategoryBadge
 import com.adcbtracker.ui.components.CategoryBreakdown
 import com.adcbtracker.ui.components.CycleHistoryBars
@@ -80,7 +82,13 @@ fun InsightsScreen(vm: MainViewModel) {
                             style = MaterialTheme.typography.labelSmall,
                             color = TextMid,
                         )
-                        Text(cur.cycle.label(), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+                        Text(
+                            cur.cycle.label(includeYear = cur.cycle.lastDay.year != s.today.year),
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                     IconButton(onClick = vm::nextCycle, enabled = !isCurrentCycle) {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next cycle")
@@ -106,21 +114,34 @@ fun InsightsScreen(vm: MainViewModel) {
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                if (isCurrentCycle && cur.totalMinor > 0) {
-                    val perDay = cur.totalMinor / elapsedDays.coerceAtLeast(1)
-                    Spacer(Modifier.height(14.dp))
-                    HorizontalDivider(color = Ink2)
-                    Spacer(Modifier.height(12.dp))
-                    Row {
-                        Column(Modifier.weight(1f)) {
-                            Text("PROJECTED AT STATEMENT", style = MaterialTheme.typography.labelSmall, color = TextMid)
-                            Text("~${formatMoney(perDay * cur.cycle.lengthDays)}", style = MaterialTheme.typography.titleMedium)
-                        }
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text("DAILY AVERAGE", style = MaterialTheme.typography.labelSmall, color = TextMid)
-                            Text(formatMoney(perDay), style = MaterialTheme.typography.titleMedium)
-                        }
+                Spacer(Modifier.height(14.dp))
+                HorizontalDivider(color = Ink2)
+                Spacer(Modifier.height(12.dp))
+                Row {
+                    Column(Modifier.weight(1f)) {
+                        Text("DAILY AVERAGE", style = MaterialTheme.typography.labelSmall, color = TextMid)
+                        Text(formatMoney(cur.totalMinor / elapsedDays.coerceAtLeast(1)), style = MaterialTheme.typography.titleMedium)
                     }
+                    Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+                        Text(if (isCurrentCycle) "DAYS LEFT" else "DAYS", style = MaterialTheme.typography.labelSmall, color = TextMid)
+                        Text(
+                            if (isCurrentCycle) "${cur.cycle.lengthDays - elapsedDays}" else "${cur.cycle.lengthDays}",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                }
+                s.projection?.takeIf { cur.totalMinor > 0 }?.let { p ->
+                    Spacer(Modifier.height(14.dp))
+                    ProjectionPanel(p)
+                }
+                if (s.budgetMinor > 0) {
+                    Spacer(Modifier.height(14.dp))
+                    BudgetPanel(
+                        budgetMinor = s.budgetMinor,
+                        spentMinor = cur.totalMinor,
+                        daysLeftIncludingToday = if (isCurrentCycle) cur.cycle.lengthDays - elapsedDays + 1 else 0,
+                        projectedMinor = s.projection?.totalMinor,
+                    )
                 }
             }
         }
@@ -162,9 +183,9 @@ fun InsightsScreen(vm: MainViewModel) {
 
         item {
             AppCard {
-                SectionTitle("By category", "Where most of your money went")
+                SectionTitle("By category", "Tap a category to see and fix its transactions")
                 Spacer(Modifier.height(16.dp))
-                CategoryBreakdown(cur.categories, cur.totalMinor)
+                CategoryBreakdown(cur.categories, cur.totalMinor) { vm.openCategory(it?.id, cur.cycle) }
             }
         }
 
@@ -192,10 +213,10 @@ fun InsightsScreen(vm: MainViewModel) {
         if (cur.biggest.isNotEmpty()) {
             item {
                 AppCard {
-                    SectionTitle("Biggest expenses", "Tap to open that day")
+                    SectionTitle("Biggest expenses", "Tap one to edit or categorize it")
                     Spacer(Modifier.height(4.dp))
                     cur.biggest.forEachIndexed { i, t ->
-                        TransactionRow(t, threshold, showDate = true) { vm.openDay(t.tx.tsEpochMillis.toUaeDate()) }
+                        TransactionRow(t, threshold, showDate = true) { vm.openTransaction(t.tx.id) }
                         if (i < cur.biggest.lastIndex) HorizontalDivider(color = Ink2)
                     }
                 }

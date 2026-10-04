@@ -66,7 +66,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-const val APP_VERSION = "2.4.0"
+const val APP_VERSION = "2.5.0"
 
 @Composable
 fun SettingsScreen(vm: MainViewModel) {
@@ -82,6 +82,10 @@ fun SettingsScreen(vm: MainViewModel) {
     var importResult by remember { mutableStateOf<String?>(null) }
     var thresholdText by remember(threshold) { mutableStateOf((threshold / 100).toString()) }
     var thresholdSaved by remember { mutableStateOf(false) }
+    val budget by vm.budget.collectAsStateWithLifecycle()
+    var budgetText by remember(budget) { mutableStateOf(if (budget > 0) (budget / 100).toString() else "") }
+    var budgetSaved by remember { mutableStateOf(false) }
+    var notifyLarge by remember { mutableStateOf(Prefs.getLargeExpenseNotify(context)) }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         listenerEnabled = AdcbNotificationListener.isEnabled(context)
@@ -169,6 +173,35 @@ fun SettingsScreen(vm: MainViewModel) {
 
         item {
             AppCard {
+                SectionTitle("Cycle budget", "How much you want to spend per billing cycle. Leave empty for no budget.")
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = budgetText,
+                        onValueChange = { budgetText = it.filter(Char::isDigit); budgetSaved = false },
+                        label = { Text("Budget (AED)") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Button(onClick = {
+                        vm.setBudget((budgetText.toLongOrNull() ?: 0L) * 100)
+                        budgetSaved = true
+                        scope.launch { com.adcbtracker.service.SpendWidget.refresh(context) }
+                    }) { Text(if (budgetSaved) "Saved" else "Save") }
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "Home and Insights then show how much is safe to spend per day until your statement.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextMid,
+                )
+            }
+        }
+
+        item {
+            AppCard {
                 SectionTitle("Import from SMS")
                 Spacer(Modifier.height(6.dp))
                 Text(
@@ -228,6 +261,20 @@ fun SettingsScreen(vm: MainViewModel) {
                         thresholdText.toLongOrNull()?.let { vm.setLargeThreshold(it * 100); thresholdSaved = true }
                     }) { Text(if (thresholdSaved) "Saved" else "Save") }
                 }
+                Spacer(Modifier.height(10.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("Notify me", style = MaterialTheme.typography.bodyLarge)
+                        Text("Phone notification when a large expense is captured", style = MaterialTheme.typography.bodySmall, color = TextMid)
+                    }
+                    androidx.compose.material3.Switch(
+                        checked = notifyLarge,
+                        onCheckedChange = {
+                            notifyLarge = it
+                            Prefs.setLargeExpenseNotify(context, it)
+                        },
+                    )
+                }
             }
         }
 
@@ -276,10 +323,12 @@ fun SettingsScreen(vm: MainViewModel) {
                 Spacer(Modifier.height(8.dp))
                 Text("New in v$APP_VERSION:", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 Text(
-                    "• Billing cycle: totals and insights follow your statement period (default: the 24th)\n" +
-                        "• Interactive spending calendar: tap any day to see what you paid\n" +
-                        "• Daily spending: today, yesterday and the last 14 days on Home, daily totals in Transactions\n" +
-                        "• Fixed \"Unknown Merchant\" for ADCB's new SMS wording",
+                    "• New app icon\n" +
+                        "• Tap any transaction anywhere to change its category (one or all from that merchant)\n" +
+                        "• Tap a category to see and fix its transactions; Home flags uncategorized ones\n" +
+                        "• Smarter statement projection that ignores one-off big purchases\n" +
+                        "• Cycle budget with safe-to-spend per day, available credit on Home\n" +
+                        "• Large-expense notifications and a home-screen widget",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMid,
                 )

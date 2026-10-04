@@ -24,6 +24,9 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE tsEpochMillis >= :start AND tsEpochMillis < :end ORDER BY tsEpochMillis DESC")
     fun inRange(start: Long, end: Long): Flow<List<TransactionEntity>>
 
+    @Query("SELECT * FROM transactions WHERE id = :id")
+    fun byId(id: Long): Flow<TransactionEntity?>
+
     @Query("UPDATE transactions SET categoryId = :categoryId WHERE id = :id")
     suspend fun updateCategory(id: Long, categoryId: Long?)
 

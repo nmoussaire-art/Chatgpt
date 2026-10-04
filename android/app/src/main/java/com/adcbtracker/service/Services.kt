@@ -22,8 +22,12 @@ import kotlinx.coroutines.launch
 private suspend fun store(context: Context, source: String, parsed: ParsedTransaction, tag: String) {
     val app = context.applicationContext as? App ?: return
     try {
-        app.repo.ingestParsed(source, parsed)
+        val isNew = app.repo.ingestParsed(source, parsed)
         Prefs.setLastCapturedTx(app, System.currentTimeMillis())
+        if (isNew) {
+            LargeExpenseNotifier.maybeNotify(app, parsed)
+            SpendWidget.refresh(app)
+        }
         Log.i(tag, "Transaction stored: ${parsed.amountMinor / 100.0} ${parsed.currency} at ${parsed.merchant}")
     } catch (e: Exception) {
         Log.e(tag, "Failed to store transaction", e)

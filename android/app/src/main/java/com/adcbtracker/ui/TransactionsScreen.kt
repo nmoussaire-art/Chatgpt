@@ -80,9 +80,6 @@ fun TransactionsScreen(vm: MainViewModel) {
     val query by vm.searchQuery.collectAsStateWithLifecycle()
     val categories by vm.categories.collectAsStateWithLifecycle()
     val threshold by vm.largeThreshold.collectAsStateWithLifecycle()
-    var expandedId by rememberSaveable { mutableStateOf<Long?>(null) }
-    var categoryFor by remember { mutableStateOf<TransactionWithCategory?>(null) }
-    var deleteFor by remember { mutableStateOf<TransactionWithCategory?>(null) }
     var showAdd by rememberSaveable { mutableStateOf(false) }
     val today = LocalDate.now(UAE_ZONE)
     val total = days.sumOf { it.count }
@@ -143,14 +140,7 @@ fun TransactionsScreen(vm: MainViewModel) {
                     }
                 }
                 items(day.transactions, key = { it.tx.id }) { item ->
-                    TransactionCard(
-                        item = item,
-                        expanded = expandedId == item.tx.id,
-                        largeThresholdMinor = threshold,
-                        onToggle = { expandedId = if (expandedId == item.tx.id) null else item.tx.id },
-                        onCategory = { categoryFor = item },
-                        onDelete = { deleteFor = item },
-                    )
+                    TransactionCard(item = item, largeThresholdMinor = threshold) { vm.openTransaction(item.tx.id) }
                     Spacer(Modifier.height(8.dp))
                 }
             }
@@ -164,32 +154,6 @@ fun TransactionsScreen(vm: MainViewModel) {
         ) { Icon(Icons.Default.Add, contentDescription = "Add manual transaction") }
     }
 
-    categoryFor?.let { item ->
-        CategoryPickerDialog(
-            title = item.tx.merchant ?: "Select category",
-            categories = categories,
-            selectedId = item.category?.id,
-            onDismiss = { categoryFor = null },
-            onPick = { id ->
-                val merchant = item.tx.merchant
-                if (merchant != null) vm.mapMerchantToCategory(merchant, id) else vm.updateTransactionCategory(item.tx.id, id)
-                categoryFor = null
-            },
-        )
-    }
-
-    deleteFor?.let { item ->
-        AlertDialog(
-            onDismissRequest = { deleteFor = null },
-            title = { Text("Delete Transaction?") },
-            text = { Text("Are you sure you want to delete this transaction? This cannot be undone.") },
-            confirmButton = {
-                TextButton(onClick = { vm.deleteTransaction(item.tx.id); deleteFor = null }) { Text("Delete", color = Coral) }
-            },
-            dismissButton = { TextButton(onClick = { deleteFor = null }) { Text("Cancel") } },
-        )
-    }
-
     if (showAdd) {
         AddTransactionDialog(categories, onDismiss = { showAdd = false }) { amount, currency, desc, catId, millis ->
             vm.addManualTransaction(amount, currency, desc, catId, millis)
@@ -201,11 +165,8 @@ fun TransactionsScreen(vm: MainViewModel) {
 @Composable
 private fun TransactionCard(
     item: TransactionWithCategory,
-    expanded: Boolean,
     largeThresholdMinor: Long,
-    onToggle: () -> Unit,
-    onCategory: () -> Unit,
-    onDelete: () -> Unit,
+    onClick: () -> Unit,
 ) {
     val tx = item.tx
     val shape = RoundedCornerShape(20.dp)
@@ -214,8 +175,7 @@ private fun TransactionCard(
             .fillMaxWidth()
             .clip(shape)
             .background(Ink1)
-            .clickable(onClick = onToggle)
-            .animateContentSize()
+            .clickable(onClick = onClick)
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -226,7 +186,7 @@ private fun TransactionCard(
                 Text(
                     listOfNotNull(
                         Instant.ofEpochMilli(tx.tsEpochMillis).atZone(UAE_ZONE).format(DateTimeFormatter.ofPattern("HH:mm", Locale.US)),
-                        item.category?.name ?: "Uncategorized",
+                        item.category?.name ?: "Uncategorized · tap to set",
                     ).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMid,
@@ -243,31 +203,6 @@ private fun TransactionCard(
                 else tx.cardId?.let { Text("Card $it", style = MaterialTheme.typography.labelSmall, color = TextMid) }
             }
         }
-        if (expanded) {
-            Spacer(Modifier.height(12.dp))
-            HorizontalDivider(color = Ink2)
-            Spacer(Modifier.height(8.dp))
-            Detail("Date", Instant.ofEpochMilli(tx.tsEpochMillis).atZone(UAE_ZONE).format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy · HH:mm:ss", Locale.US)))
-            tx.location?.let { Detail("Location", it) }
-            tx.cardId?.let { Detail("Card", it) }
-            tx.avlCreditLimitMinor?.let { Detail("Available Limit", formatMoney(it, tx.currency)) }
-            Detail("Captured via", tx.source.replaceFirstChar { it.uppercase() })
-            Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onCategory, modifier = Modifier.weight(1f)) {
-                    Text(if (item.category == null) "Set category" else "${item.category.icon} ${item.category.name}", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                OutlinedButton(onClick = onDelete) { Text("Delete", color = Coral) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun Detail(label: String, value: String) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
-        Text(label, style = MaterialTheme.typography.bodySmall, color = TextMid, modifier = Modifier.width(120.dp))
-        Text(value, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
     }
 }
 

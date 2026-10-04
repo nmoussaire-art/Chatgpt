@@ -52,6 +52,7 @@ import com.adcbtracker.data.Category
 import com.adcbtracker.data.MerchantWithCategory
 import com.adcbtracker.ui.components.CategoryBadge
 import com.adcbtracker.ui.components.EmptyState
+import com.adcbtracker.ui.components.MerchantCategorySheet
 import com.adcbtracker.ui.components.formatMoney
 import com.adcbtracker.ui.components.parseColor
 import com.adcbtracker.ui.theme.Coral
@@ -81,13 +82,25 @@ fun CategoriesScreen(vm: MainViewModel) {
 
 @Composable
 private fun MerchantsTab(vm: MainViewModel, merchants: List<MerchantWithCategory>, categories: List<Category>) {
-    var onlyUncategorized by rememberSaveable { mutableStateOf(false) }
+    var onlyUncategorized by rememberSaveable { mutableStateOf(merchants.any { it.categoryId == null }) }
+    var query by rememberSaveable { mutableStateOf("") }
     var picking by remember { mutableStateOf<MerchantWithCategory?>(null) }
-    val shown = if (onlyUncategorized) merchants.filter { it.categoryId == null } else merchants
+    val shown = merchants
+        .filter { !onlyUncategorized || it.categoryId == null }
+        .filter { query.isBlank() || it.merchant.contains(query.trim(), ignoreCase = true) }
 
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
             Text("Map merchants to categories. Future transactions will be auto-categorized.", style = MaterialTheme.typography.bodyMedium, color = TextMid)
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Search merchants…") },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+            )
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(selected = !onlyUncategorized, onClick = { onlyUncategorized = false }, label = { Text("All Merchants") })
@@ -104,7 +117,7 @@ private fun MerchantsTab(vm: MainViewModel, merchants: List<MerchantWithCategory
                 else EmptyState("🎉", "All merchants categorized!", "Great job! All your merchants have categories.")
             }
         }
-        items(shown, key = { it.merchant.lowercase() }) { m ->
+        items(shown) { m ->
             val cat = categories.firstOrNull { it.id == m.categoryId }
             Row(
                 Modifier
@@ -131,7 +144,13 @@ private fun MerchantsTab(vm: MainViewModel, merchants: List<MerchantWithCategory
     }
 
     picking?.let { m ->
-        CategoryPickerDialog(m.merchant, categories, m.categoryId, onDismiss = { picking = null }) { id ->
+        MerchantCategorySheet(
+            merchant = m.merchant,
+            subtitle = "${m.transactionCount} txn${if (m.transactionCount == 1) "" else "s"} · ${formatMoney(m.totalSpent)}",
+            categories = categories,
+            selectedId = m.categoryId,
+            onDismiss = { picking = null },
+        ) { id ->
             vm.mapMerchantToCategory(m.merchant, id)
             picking = null
         }

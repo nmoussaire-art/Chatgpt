@@ -76,23 +76,30 @@ fun DailyPaceChart(
         Spacer(Modifier.height(12.dp))
 
         val sel = selected
-        Box(Modifier.fillMaxWidth().height(32.dp)) {
+        Column(Modifier.fillMaxWidth().height(46.dp)) {
             if (sel != null) {
                 val date = cycle.start.plusDays(sel.toLong())
                 val cur = if (sel < visibleDays) current.getOrNull(sel) else null
-                Text(
-                    buildString {
-                        append("Day ${sel + 1} · ${date.format(fmt)}  ")
-                        append(cur?.let { formatMoney(it) } ?: "—")
-                        previous.getOrNull(sel)?.let { append("  ·  prev ${formatMoney(it)}") }
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = TextHigh,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Text("Day ${sel + 1} · ${date.format(fmt)}", style = MaterialTheme.typography.labelMedium, color = TextMid)
+                Row {
+                    Text(
+                        "This: ${cur?.let { formatMoney(it) } ?: "—"}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Emerald,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                    )
+                    Text(
+                        "Previous: ${previous.getOrNull(sel)?.let { formatMoney(it) } ?: "—"}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = TextHigh,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                    )
+                }
             } else {
-                Text("Touch the chart to read a day", style = MaterialTheme.typography.labelMedium, color = TextMid)
+                Text("Touch or drag on the chart to compare a day", style = MaterialTheme.typography.labelMedium, color = TextMid)
             }
         }
 
@@ -229,7 +236,7 @@ fun CycleHistoryBars(history: List<Pair<Cycle, Long>>, selected: Cycle, onSelect
 
 /** Stacked share bar plus one row per category. */
 @Composable
-fun CategoryBreakdown(rows: List<CategoryTotal>, total: Long) {
+fun CategoryBreakdown(rows: List<CategoryTotal>, total: Long, onClick: (com.adcbtracker.data.Category?) -> Unit) {
     if (rows.isEmpty() || total <= 0) {
         Text("No spending recorded for this cycle.", style = MaterialTheme.typography.bodyMedium, color = TextMid)
         return
@@ -244,7 +251,10 @@ fun CategoryBreakdown(rows: List<CategoryTotal>, total: Long) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         rows.forEach { r ->
             val f = r.totalMinor.toFloat() / total
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { onClick(r.category) },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 CategoryBadge(r.category, size = 34)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {

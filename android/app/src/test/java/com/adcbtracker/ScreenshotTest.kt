@@ -61,6 +61,12 @@ class ScreenshotTest {
         app.repo.mapMerchantToCategory("TALABAT", 1)
         app.repo.mapMerchantToCategory("STARBUCKS", 1)
         app.repo.mapMerchantToCategory("MAX", 3)
+        val cycleStart = com.adcbtracker.data.Cycles.cycleFor(today, 24).start
+        app.repo.ingestParsed(
+            "sms",
+            ParsedTransaction("XX1332", 348945L, "AED", "AIR CANADA", "TORONTO-CA", cycleStart.atTime(LocalTime.of(10, 5)), 4_800_000L, "seed oneoff"),
+        )
+        com.adcbtracker.data.Prefs.setCycleBudgetMinor(app, 1_500_000L)
     }
 
     private fun shot(name: String) {
@@ -71,7 +77,30 @@ class ScreenshotTest {
     }
 
     @Test
+    fun icon() {
+        val ctx = ApplicationProvider.getApplicationContext<App>()
+        val d = ctx.getDrawable(R.mipmap.ic_launcher)!!
+        val bmp = android.graphics.Bitmap.createBitmap(432, 432, android.graphics.Bitmap.Config.ARGB_8888)
+        val c = android.graphics.Canvas(bmp)
+        d.setBounds(0, 0, 432, 432)
+        d.draw(c)
+        java.io.File(out).mkdirs()
+        java.io.FileOutputStream("$out/0_icon.png").use { bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    @Test
+    fun sheets() {
+        org.robolectric.RuntimeEnvironment.setFontScale(1.3f)
+        compose.waitUntil(5000) { compose.onAllNodesWithText("Daily spending").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("need a category", substring = true).performClick()
+        shot("7_uncategorized_sheet")
+        compose.onAllNodesWithText("NOON").onFirst().performClick()
+        shot("8_transaction_sheet")
+    }
+
+    @Test
     fun homeAndDaySheet() {
+        org.robolectric.RuntimeEnvironment.setFontScale(1.3f)
         compose.waitUntil(5000) { compose.onAllNodesWithText("Daily spending").fetchSemanticsNodes().isNotEmpty() }
         shot("1_home")
         compose.onAllNodesWithText("Yesterday").onFirst().performClick()
@@ -80,10 +109,12 @@ class ScreenshotTest {
 
     @Test
     fun insights() {
+        org.robolectric.RuntimeEnvironment.setFontScale(1.3f)
         compose.waitUntil(5000) { compose.onAllNodesWithText("Daily spending").fetchSemanticsNodes().isNotEmpty() }
         compose.onAllNodesWithText("Insights").onFirst().performClick()
         compose.waitUntil(5000) { compose.onAllNodesWithText("Spending calendar").fetchSemanticsNodes().isNotEmpty() }
         shot("3_insights")
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Daily pace"))
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("By day of week"))
         shot("3b_insights_charts")
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Cycle history"))
@@ -92,8 +123,9 @@ class ScreenshotTest {
 
     @Test
     fun otherTabs() {
+        org.robolectric.RuntimeEnvironment.setFontScale(1.3f)
         compose.waitUntil(5000) { compose.onAllNodesWithText("Daily spending").fetchSemanticsNodes().isNotEmpty() }
-        compose.onAllNodesWithText("Transactions").onFirst().performClick()
+        compose.onAllNodesWithText("Expenses").onFirst().performClick()
         shot("4_transactions")
         compose.onAllNodesWithText("Categories").onFirst().performClick()
         shot("5_categories")

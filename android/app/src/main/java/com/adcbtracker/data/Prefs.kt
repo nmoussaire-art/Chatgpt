@@ -12,6 +12,8 @@ object Prefs {
     private const val KEY_LAST_CAPTURED_TX_EPOCH_MILLIS = "last_captured_tx_epoch_millis"
     private const val KEY_LAST_HEARTBEAT_EPOCH_MILLIS = "last_heartbeat_epoch_millis"
     private const val KEY_CYCLE_START_DAY = "cycle_start_day"
+    private const val KEY_CYCLE_BUDGET_MINOR = "cycle_budget_minor"
+    private const val KEY_LARGE_EXPENSE_NOTIFY = "large_expense_notify"
 
     private fun prefs(context: Context): SharedPreferences =
         context.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE)
@@ -38,4 +40,16 @@ object Prefs {
 
     fun setCycleStartDay(context: Context, day: Int) =
         prefs(context).edit().putInt(KEY_CYCLE_START_DAY, day.coerceIn(1, 28)).apply()
+
+    /** Spending budget per billing cycle; 0 means no budget set. */
+    fun getCycleBudgetMinor(context: Context): Long = prefs(context).getLong(KEY_CYCLE_BUDGET_MINOR, 0L)
+
+    fun setCycleBudgetMinor(context: Context, minor: Long) =
+        prefs(context).edit().putLong(KEY_CYCLE_BUDGET_MINOR, minor.coerceAtLeast(0)).apply()
+
+    /** Post a phone notification when a captured transaction is at or above the large-expense threshold. */
+    fun getLargeExpenseNotify(context: Context): Boolean = prefs(context).getBoolean(KEY_LARGE_EXPENSE_NOTIFY, true)
+
+    fun setLargeExpenseNotify(context: Context, enabled: Boolean) =
+        prefs(context).edit().putBoolean(KEY_LARGE_EXPENSE_NOTIFY, enabled).apply()
 }

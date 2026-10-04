@@ -125,3 +125,61 @@ object Stats {
         return sum
     }
 }
+
+/**
+ * Statement projection that is not thrown off by one-off big purchases.
+ *
+ * total = spent so far + (usual daily spend × days left), where "usual daily spend" leaves out
+ * one-off purchases at or above [Projection.oneOffThresholdMinor] and blends this cycle's pace
+ * with the average of recent complete cycles (this cycle gets more weight as it progresses).
+ */
+data class Projection(
+    val totalMinor: Long,
+    val spentSoFarMinor: Long,
+    val oneOffsMinor: Long,
+    val oneOffCount: Int,
+    val usualDailyMinor: Long,
+    val daysLeft: Int,
+    val oneOffThresholdMinor: Long,
+    val basedOnCycles: Int,
+)
+
+object Projections {
+    fun project(
+        current: Cycle,
+        txs: List<TransactionWithCategory>,
+        today: LocalDate,
+        pastCycles: List<Cycle>,
+        oneOffThresholdMinor: Long,
+    ): Projection {
+        fun regular(list: List<TransactionWithCategory>) =
+            list.filter { it.tx.amountMinor in 1 until oneOffThresholdMinor }.sumOf { it.tx.amountMinor }
+
+        val inCycle = txs.filter { current.contains(it.tx.tsEpochMillis.toUaeDate()) }
+        val spent = inCycle.sumOf { it.tx.spendMinor }
+        val oneOffs = inCycle.filter { it.tx.amountMinor >= oneOffThresholdMinor }
+        val elapsed = (current.dayIndex(minOf(today, current.lastDay)) + 1).coerceAtLeast(1)
+        val daysLeft = (current.lengthDays - elapsed).coerceAtLeast(0)
+        val currentRate = regular(inCycle).toDouble() / elapsed
+
+        // Only use past cycles that actually have data (the app may be newer than a year).
+        val pastRates = pastCycles.mapNotNull { c ->
+            val list = txs.filter { c.contains(it.tx.tsEpochMillis.toUaeDate()) }
+            if (list.isEmpty()) null else regular(list).toDouble() / c.lengthDays
+        }
+        val rate = if (pastRates.isEmpty()) currentRate else {
+            val w = elapsed.toDouble() / current.lengthDays
+            w * currentRate + (1 - w) * pastRates.average()
+        }
+        return Projection(
+            totalMinor = spent + (rate * daysLeft).toLong(),
+            spentSoFarMinor = spent,
+            oneOffsMinor = oneOffs.sumOf { it.tx.amountMinor },
+            oneOffCount = oneOffs.size,
+            usualDailyMinor = rate.toLong(),
+            daysLeft = daysLeft,
+            oneOffThresholdMinor = oneOffThresholdMinor,
+            basedOnCycles = pastRates.size,
+        )
+    }
+}

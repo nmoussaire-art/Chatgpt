@@ -2,6 +2,7 @@ package com.adcbtracker
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -42,7 +42,9 @@ import com.adcbtracker.ui.InsightsScreen
 import com.adcbtracker.ui.MainViewModel
 import com.adcbtracker.ui.SettingsScreen
 import com.adcbtracker.ui.TransactionsScreen
+import com.adcbtracker.ui.components.CategorySheet
 import com.adcbtracker.ui.components.DayDetailSheet
+import com.adcbtracker.ui.components.TransactionSheet
 import com.adcbtracker.ui.theme.AdcbTheme
 import com.adcbtracker.ui.theme.Emerald
 import com.adcbtracker.ui.theme.Ink0
@@ -52,7 +54,7 @@ import java.time.LocalDate
 private enum class Screen(val route: String, val label: String, val icon: ImageVector) {
     Home("home", "Home", Icons.Default.Home),
     Insights("insights", "Insights", Icons.Default.Insights),
-    Transactions("transactions", "Transactions", Icons.AutoMirrored.Filled.ReceiptLong),
+    Transactions("transactions", "Expenses", Icons.AutoMirrored.Filled.ReceiptLong),
     Categories("categories", "Categories", Icons.Default.Category),
     Settings("settings", "Settings", Icons.Default.Settings),
 }
@@ -70,7 +72,9 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED
         ) {
-            smsPermissions.launch(arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS))
+            val perms = mutableListOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS)
+            if (Build.VERSION.SDK_INT >= 33) perms += Manifest.permission.POST_NOTIFICATIONS
+            smsPermissions.launch(perms.toTypedArray())
         }
 
         setContent {
@@ -81,6 +85,10 @@ class MainActivity : ComponentActivity() {
                 val selectedDay by vm.selectedDay.collectAsStateWithLifecycle()
                 val daySummary by vm.selectedDaySummary.collectAsStateWithLifecycle()
                 val threshold by vm.largeThreshold.collectAsStateWithLifecycle()
+                val categories by vm.categories.collectAsStateWithLifecycle()
+                val selectedTx by vm.selectedTransaction.collectAsStateWithLifecycle()
+                val categorySelection by vm.categorySelection.collectAsStateWithLifecycle()
+                val categoryTxs by vm.categorySheetTransactions.collectAsStateWithLifecycle()
 
                 Scaffold(
                     containerColor = Ink0,
@@ -97,8 +105,10 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                     icon = { Icon(s.icon, contentDescription = s.label) },
+                                    // Labels only on the selected tab so large font sizes never overlap.
+                                    alwaysShowLabel = false,
                                     label = {
-                                        Text(s.label, style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp), maxLines = 1, softWrap = false, overflow = TextOverflow.Visible)
+                                        Text(s.label, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false, overflow = TextOverflow.Ellipsis)
                                     },
                                     colors = NavigationBarItemDefaults.colors(
                                         selectedIconColor = MaterialTheme.colorScheme.onPrimary,
@@ -121,7 +131,10 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                selectedDay?.let { day ->
+                // Only one sheet at a time: the transaction editor temporarily replaces the day or
+                // category sheet it was opened from, which comes back when the editor closes.
+                val editing = selectedTx != null
+                if (!editing && categorySelection == null) selectedDay?.let { day ->
                     DayDetailSheet(
                         day = day,
                         summary = daySummary?.takeIf { it.date == day },
@@ -129,6 +142,36 @@ class MainActivity : ComponentActivity() {
                         largeThresholdMinor = threshold,
                         onDismiss = vm::closeDay,
                         onChangeDay = vm::openDay,
+                        onTransactionClick = { vm.openTransaction(it.tx.id) },
+                    )
+                }
+
+                if (!editing) categorySelection?.let { sel ->
+                    CategorySheet(
+                        category = categories.firstOrNull { it.id == sel.categoryId },
+                        cycle = sel.cycle,
+                        transactions = categoryTxs,
+                        largeThresholdMinor = threshold,
+                        onDismiss = vm::closeCategory,
+                        onTransactionClick = { vm.openTransaction(it.tx.id) },
+                    )
+                }
+
+                selectedTx?.let { item ->
+                    TransactionSheet(
+                        item = item,
+                        categories = categories,
+                        onDismiss = vm::closeTransaction,
+                        onSetCategory = { categoryId, applyToMerchant ->
+                            val merchant = item.tx.merchant
+                            if (applyToMerchant && merchant != null) vm.mapMerchantToCategory(merchant, categoryId)
+                            else vm.updateTransactionCategory(item.tx.id, categoryId)
+                            vm.closeTransaction()
+                        },
+                        onDelete = {
+                            vm.deleteTransaction(item.tx.id)
+                            vm.closeTransaction()
+                        },
                     )
                 }
             }
